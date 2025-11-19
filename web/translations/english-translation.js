@@ -22,8 +22,13 @@ const en = {
     
     // Categories
     categoryAll: "All",
+    categoryFavorites: "Favorites",
     categoryLoading: "Loading categories...",
     categoryLoadError: "Loading error",
+
+    // Favorites
+    favoriteItem: "Add to favorites",
+    unfavoriteItem: "Remove from favorites",
     
     // Sorting
     sortBy: "Sort by:",

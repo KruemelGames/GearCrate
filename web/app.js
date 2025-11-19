@@ -5,19 +5,59 @@ let currentItem = null;
 let searchTimeout = null;
 let selectedItemForModal = null;
 let searchCache = {};
-let currentSortBy = 'name';
-let currentSortOrder = 'asc';
-let currentCategoryFilter = '';
+// ÄNDERUNG 1: Initialwerte aus localStorage laden
+let currentSortBy = localStorage.getItem('sortBy') || 'name';
+let currentSortOrder = localStorage.getItem('sortOrder') || 'asc';
+let currentCategoryFilter = localStorage.getItem('categoryFilter') || '';
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // NEU: Anwendung der geladenen Einstellungen auf die UI
+    applySavedSettingsToUI();
+    
     loadInventory();
     loadStats();
-    loadCategories();
+    // loadCategories muss NACH applySavedSettingsToUI laufen, 
+    // da es currentCategoryFilter zur Bestimmung des aktiven Buttons nutzt
+    loadCategories(); 
     setupEventListeners();
     loadSearchLimit();
     setupKeyboardShortcuts();
 });
+
+// NEUE FUNKTION: Speichert Sortierung und Filter
+function saveSortAndFilterSettings() {
+    localStorage.setItem('sortBy', currentSortBy);
+    localStorage.setItem('sortOrder', currentSortOrder);
+    localStorage.setItem('categoryFilter', currentCategoryFilter);
+    console.log(`✅ Saved settings: SortBy=${currentSortBy}, SortOrder=${currentSortOrder}, CategoryFilter=${currentCategoryFilter}`);
+}
+
+// NEUE FUNKTION: Wendet gespeicherte Einstellungen auf UI-Elemente an
+function applySavedSettingsToUI() {
+    // Sortierungs-Buttons
+    document.querySelectorAll('.sort-btn').forEach(b => {
+        b.classList.remove('active');
+        if (b.dataset.sort === currentSortBy) {
+            b.classList.add('active');
+        }
+    });
+
+    // Sortierreihenfolge-Button
+    const sortOrderBtn = document.getElementById('sort-order-btn');
+    if (sortOrderBtn) {
+        if (currentSortOrder === 'asc') {
+            // Sicherstellen, dass der Text die aktuelle Sprache berücksichtigt (falls i18n geladen ist)
+            const text = (typeof t === 'function' && t('sortAscending') !== 'sortAscending') 
+                ? t('sortAscending') : '⬇️ Aufsteigend';
+            sortOrderBtn.textContent = '⬇️ ' + text.replace('⬇️ ', '');
+        } else {
+            const text = (typeof t === 'function' && t('sortDescending') !== 'sortDescending') 
+                ? t('sortDescending') : '⬆️ Absteigend';
+            sortOrderBtn.textContent = '⬆️ ' + text.replace('⬆️ ', '');
+        }
+    }
+}
 
 function setupEventListeners() {
     // Search input with debounce
@@ -44,6 +84,8 @@ function setupEventListeners() {
             this.classList.add('active');
             // Update sort
             currentSortBy = this.dataset.sort;
+            // ÄNDERUNG 2: Sortierung speichern
+            saveSortAndFilterSettings();
             loadInventory();
         });
     });
@@ -59,6 +101,8 @@ function setupEventListeners() {
             } else {
                 this.textContent = '⬆️ ' + t('sortDescending').replace('⬆️ ', '');
             }
+            // ÄNDERUNG 3: Sortierreihenfolge speichern
+            saveSortAndFilterSettings();
             loadInventory();
         });
     }
@@ -138,45 +182,60 @@ async function loadCategories() {
         // Clear loading message
         buttonGrid.innerHTML = '';
         
-        // Add "All" button first
+        // 1. Add "All" button first
         const allBtn = document.createElement('button');
-        allBtn.className = 'category-btn active';
+        allBtn.className = 'category-btn';
+        // ÄNDERUNG 4: Aktiver Zustand durch currentCategoryFilter gesteuert
+        if (currentCategoryFilter === '') allBtn.classList.add('active');
         allBtn.textContent = '📦 ' + t('categoryAll');
         allBtn.dataset.category = '';
         allBtn.addEventListener('click', function() {
-            // Remove active from all buttons
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            // Make this button active
-            this.classList.add('active');
-            // Filter inventory
+            updateCategoryActiveState(this);
             currentCategoryFilter = '';
+            // ÄNDERUNG 5: Kategorie speichern
+            saveSortAndFilterSettings();
             loadInventory();
         });
         buttonGrid.appendChild(allBtn);
+
+        // 2. NEU: Add "Favorites" button directly after All
+        const favBtn = document.createElement('button');
+        favBtn.className = 'category-btn';
+        // ÄNDERUNG 6: Aktiver Zustand durch currentCategoryFilter gesteuert
+        if (currentCategoryFilter === 'Favorites') favBtn.classList.add('active');
+        // Versuche Übersetzung zu nutzen oder Fallback
+        const favText = (typeof t === 'function' && t('categoryFavorites') !== 'categoryFavorites') ? t('categoryFavorites') : 'Favorites';
+        favBtn.textContent = '⭐ ' + favText;
+        favBtn.dataset.category = 'Favorites';
+        // Spezielles Styling für Favoriten-Button (optional via CSS data-category selector)
+        favBtn.addEventListener('click', function() {
+            updateCategoryActiveState(this);
+            currentCategoryFilter = 'Favorites';
+            // ÄNDERUNG 7: Kategorie speichern
+            saveSortAndFilterSettings();
+            loadInventory();
+        });
+        buttonGrid.appendChild(favBtn);
         
-        // Add category buttons
+        // 3. Add dynamic category buttons
         categories.forEach(category => {
             const btn = document.createElement('button');
             btn.className = 'category-btn';
+            // ÄNDERUNG 8: Aktiver Zustand durch currentCategoryFilter gesteuert
+            if (currentCategoryFilter === category) btn.classList.add('active');
             btn.textContent = category;
             btn.dataset.category = category;
             btn.addEventListener('click', function() {
-                // Remove active from all buttons
-                document.querySelectorAll('.category-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                // Make this button active
-                this.classList.add('active');
-                // Filter inventory
+                updateCategoryActiveState(this);
                 currentCategoryFilter = category;
+                // ÄNDERUNG 9: Kategorie speichern
+                saveSortAndFilterSettings();
                 loadInventory();
             });
             buttonGrid.appendChild(btn);
         });
         
-        console.log(`✅ Loaded ${categories.length} category buttons`);
+        console.log(`✅ Loaded ${categories.length} category buttons + Favorites`);
     } catch (error) {
         console.error('Error loading categories:', error);
         const buttonGrid = document.getElementById('category-buttons');
@@ -184,6 +243,14 @@ async function loadCategories() {
             buttonGrid.innerHTML = `<div style="color: #f44; padding: 10px;">${t('categoryLoadError')}</div>`;
         }
     }
+}
+
+// Helper to handle active state switching
+function updateCategoryActiveState(clickedBtn) {
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    clickedBtn.classList.add('active');
 }
 
 function loadSearchLimit() {
@@ -477,6 +544,34 @@ async function addItemToInventory() {
     }
 }
 
+// NEU: Toggle Favorite Function
+async function toggleFavorite(itemName, isFavorite) {
+    try {
+        const response = await fetch('/api/toggle_favorite', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name: itemName, is_favorite: isFavorite })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            // Reload inventory to update view (especially if in Favorites category)
+            await loadInventory();
+            
+            // Optional: Auch Stats updaten, da sich die Favorites-Kategorie geändert hat
+            await loadStats();
+        } else {
+            alert(t('errorUpdating') + ': ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
+        alert(t('errorUpdating'));
+    }
+}
+
 async function loadInventory() {
     try {
         console.time('Load Inventory');
@@ -487,17 +582,23 @@ async function loadInventory() {
             sort_order: currentSortOrder
         });
         
-        if (currentCategoryFilter) {
-            params.append('category_filter', currentCategoryFilter);
+        // NEU: Filter Logik für Favorites vs Normale Kategorien
+        if (currentCategoryFilter === 'Favorites') {
+            params.append('is_favorite', '1');
+        } else if (currentCategoryFilter) {
+            // Achtung: Backend erwartet 'category', Frontend verwendete früher 'category_filter'
+            // Wir senden 'category' passend zum neuen Backend
+            params.append('category', currentCategoryFilter);
         }
         
+        // NOTE: Wir nutzen hier direkt fetch, da api-adapter.js ggf. nicht flexibel genug für Custom Params ist
         const response = await fetch(`/api/get_inventory_items?${params}`);
         if (!response.ok) {
             throw new Error('Failed to load inventory');
         }
         const items = await response.json();
         
-        console.log(`✅ Loaded ${items.length} inventory items (${currentSortBy} ${currentSortOrder})`);
+        console.log(`✅ Loaded ${items.length} inventory items (${currentSortBy} ${currentSortOrder}, Filter: ${currentCategoryFilter})`);
         displayInventory(items);
         console.timeEnd('Load Inventory');
     } catch (error) {
@@ -568,7 +669,25 @@ function createInventoryItem(item) {
         div.appendChild(placeholder);
     }
     
-    // Quick action buttons
+    // NEU: Favorite Button (Oben Links)
+    const favBtn = document.createElement('button');
+    favBtn.className = 'favorite-btn';
+    if (item.is_favorite) {
+        favBtn.classList.add('is-favorite');
+        favBtn.title = 'Unfavorite'; // Tooltip
+    } else {
+        favBtn.title = 'Favorite'; // Tooltip
+    }
+    favBtn.innerHTML = '★'; // Stern Unicode
+    
+    // Event Listener für Favoriten-Button
+    favBtn.addEventListener('click', async (e) => {
+        e.stopPropagation(); // Verhindert das Öffnen des Modals
+        await toggleFavorite(item.name, !item.is_favorite);
+    });
+    div.appendChild(favBtn);
+    
+    // Quick action buttons (Oben Rechts)
     const quickActions = document.createElement('div');
     quickActions.style.position = 'absolute';
     quickActions.style.top = '5px';
@@ -700,6 +819,7 @@ async function showItemModal(item) {
     }
     
     // AUTO-SAVE setup
+    // Remove old event listeners by replacing the elements
     const newCountInput = countInput.cloneNode(true);
     const newNotesInput = notesInput.cloneNode(true);
     countInput.parentNode.replaceChild(newCountInput, countInput);

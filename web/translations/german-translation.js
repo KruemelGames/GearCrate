@@ -22,9 +22,14 @@ const de = {
     
     // Categories
     categoryAll: "Alle",
+    categoryFavorites: "Favoriten",
     categoryLoading: "Lade Kategorien...",
     categoryLoadError: "Fehler beim Laden",
     
+    // Favorites
+    favoriteItem: "Zu Favoriten hinzufügen",
+    unfavoriteItem: "Aus Favoriten entfernen",
+
     // Sorting
     sortBy: "Sortieren nach:",
     sortName: "Name",

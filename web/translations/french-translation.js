@@ -22,8 +22,13 @@ const fr = {
     
     // Categories
     categoryAll: "Tous",
+    categoryFavorites: "Favoris",
     categoryLoading: "Chargement des catégories...",
     categoryLoadError: "Erreur de chargement",
+
+    // Favorites
+    favoriteItem: "Ajouter aux favoris",
+    unfavoriteItem: "Retirer des favoris",
     
     // Sorting
     sortBy: "Trier par:",

@@ -332,6 +332,19 @@ section h2 {
     box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
 }
 
+/* Special Style for Favorites Category Button if needed */
+.category-btn[data-category="Favorites"] {
+    border-color: #ffc107;
+    color: #ffc107;
+}
+
+.category-btn[data-category="Favorites"].active {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+}
+
 /* Inactive/Disabled Category (Red) */
 .category-btn.disabled {
     background: #1a1a2e;
@@ -377,7 +390,7 @@ section h2 {
     cursor: pointer;
     transition: all 0.3s;
     border: 2px solid transparent;
-    position: relative;
+    position: relative; /* Wichtig für die absolute Positionierung des Sterns */
 }
 
 .inventory-item:hover {
@@ -409,6 +422,50 @@ section h2 {
     color: #00d9ff;
     font-weight: bold;
     font-size: 1.2em;
+}
+
+/* ==============================================
+   FAVORITE BUTTON STYLING (NEU)
+   ==============================================
+*/
+.favorite-btn {
+    position: absolute;
+    top: 5px;
+    left: 5px; /* Links positioniert, um Konflikt mit +/- Buttons rechts zu vermeiden */
+    background: none;
+    border: none;
+    color: #555; /* Farbe für leeren Stern */
+    font-size: 1.5em;
+    cursor: pointer;
+    z-index: 20;
+    opacity: 0; /* Standardmäßig unsichtbar */
+    transition: all 0.2s ease-in-out;
+    padding: 0;
+    line-height: 1;
+    text-shadow: 0 0 2px rgba(0,0,0,0.8); /* Schatten für bessere Sichtbarkeit auf hellem Bild */
+}
+
+/* Stern sichtbar machen beim Hover über Item */
+.inventory-item:hover .favorite-btn {
+    opacity: 1;
+}
+
+/* Hover-Effekt für den Stern selbst */
+.favorite-btn:hover {
+    transform: scale(1.2);
+    color: #fff;
+}
+
+/* Aktiver Zustand (Favorisiert) */
+.favorite-btn.is-favorite {
+    opacity: 1; /* Immer sichtbar */
+    color: #ffc107; /* Goldgelb */
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+}
+
+/* Beim Hover über favorisierten Stern bleibt er gelb */
+.favorite-btn.is-favorite:hover {
+    color: #ffe066;
 }
 
 /* Stats Grid */

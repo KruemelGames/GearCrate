@@ -2,6 +2,7 @@
 GearCrate - Browser Mode Server (FIXED)
 - Static image serving with caching
 - Query parameter support for sorting/filtering
+- Favorites support
 """
 import os
 import sys
@@ -89,13 +90,32 @@ class GearCrateAPIHandler(SimpleHTTPRequestHandler):
                 # Extract query parameters
                 sort_by = query_params.get('sort_by', ['name'])[0]
                 sort_order = query_params.get('sort_order', ['asc'])[0]
-                category_filter = query_params.get('category_filter', [None])[0]
                 
-                result = GearCrateAPIHandler.api.get_inventory_items(
-                    sort_by=sort_by,
-                    sort_order=sort_order,
-                    category_filter=category_filter
-                )
+                # Check for 'category' (new) OR 'category_filter' (old)
+                category = query_params.get('category', [None])[0]
+                if not category:
+                    category = query_params.get('category_filter', [None])[0]
+                
+                # NEU: is_favorite Parameter auslesen
+                is_favorite = query_params.get('is_favorite', [None])[0]
+                
+                # Rufe die inventory-Funktion im Backend auf
+                # Wir prüfen, ob die Methode 'inventory' existiert (neues Backend) oder 'get_inventory_items' (altes Backend)
+                if hasattr(GearCrateAPIHandler.api, 'inventory'):
+                    result = GearCrateAPIHandler.api.inventory(
+                        sort_by=sort_by,
+                        sort_order=sort_order,
+                        category=category,
+                        is_favorite=is_favorite
+                    )
+                else:
+                    # Fallback für Kompatibilität
+                    print("⚠️ Warning: Using legacy backend method 'get_inventory_items'")
+                    result = GearCrateAPIHandler.api.get_inventory_items(
+                        sort_by=sort_by,
+                        sort_order=sort_order,
+                        category_filter=category
+                    )
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
@@ -134,10 +154,10 @@ class GearCrateAPIHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         """Handle API POST requests"""
         if self.path.startswith('/api/'):
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
             try:
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                
                 data = json.loads(post_data.decode('utf-8'))
                 method = self.path.split('/api/')[1]
                 
@@ -151,10 +171,11 @@ class GearCrateAPIHandler(SimpleHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(json.dumps(result).encode())
                 else:
+                    print(f"❌ API method not found: {method}")
                     self.send_error(404, f"API method {method} not found")
             
             except Exception as e:
-                print(f"❌ API Error: {e}")
+                print(f"❌ API POST Error: {e}")
                 import traceback
                 traceback.print_exc()
                 self.send_error(500, str(e))
@@ -197,7 +218,11 @@ def start_server():
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("\n\n🛑 Server stopping...")
-        GearCrateAPIHandler.api.close()
+        try:
+            if hasattr(GearCrateAPIHandler.api, 'close'):
+                GearCrateAPIHandler.api.close()
+        except:
+            pass
         httpd.shutdown()
         print("✅ GearCrate stopped!")
 

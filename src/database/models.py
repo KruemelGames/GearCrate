@@ -37,6 +37,7 @@ class Database:
                 radiation_scrub_rate REAL,
                 capacity REAL,
                 volume REAL,
+                is_favorite INTEGER DEFAULT 0,  -- NEU: Favoriten-Status (0=false, 1=true)
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -61,7 +62,8 @@ class Database:
             ('radiation_scrub_rate', 'REAL'),
             ('capacity', 'REAL'),
             ('volume', 'REAL'),
-            ('added_to_inventory_at', 'TIMESTAMP')  # NEU: Wann Item ins Inventar kam
+            ('added_to_inventory_at', 'TIMESTAMP'),  # NEU: Wann Item ins Inventar kam
+            ('is_favorite', 'INTEGER DEFAULT 0')  # NEU: Favoriten-Spalte hinzufügen
         ]
         
         for column_name, column_type in columns_to_add:
