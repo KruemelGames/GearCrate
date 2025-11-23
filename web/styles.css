@@ -193,6 +193,7 @@ section h2 {
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
+    position: relative; /* Für Autocomplete Dropdown */
 }
 
 #search-input {
@@ -1203,4 +1204,73 @@ textarea {
     font-size: 0.85em;
     color: #aaa;
     margin-top: 5px;
+}
+
+/* ==========================================
+   AUTOCOMPLETE DROPDOWN
+   ========================================== */
+
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1a1a2e;
+    border: 2px solid #00d9ff;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.autocomplete-dropdown.hidden {
+    display: none;
+}
+
+.autocomplete-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #333;
+    color: #fff;
+}
+
+.autocomplete-item:hover {
+    background: #2a2a3e;
+    color: #00d9ff;
+}
+
+.autocomplete-item.selected {
+    background: #00d9ff;
+    color: #000;
+    font-weight: bold;
+}
+
+.autocomplete-item strong {
+    color: #00ffff;
+    font-weight: bold;
+}
+
+.autocomplete-item.selected strong {
+    color: #000;
+}
+
+/* Scrollbar Styling für Autocomplete */
+.autocomplete-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-track {
+    background: #0f0f1e;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb {
+    background: #00d9ff;
+    border-radius: 4px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #00ffff;
 }

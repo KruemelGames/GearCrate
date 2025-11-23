@@ -11,6 +11,10 @@ let currentGearSetsFilter = 'all';
 let currentSelectedSet = 'ADP';
 let loadedSets = {}; // Speichert geladene Sets
 
+// NEU: Fuse.js Search Engine
+let fuseInstance = null;
+let allItemsForSearch = [];
+
 // ÄNDERUNG 1: Initialwerte aus localStorage laden
 let currentSortBy = localStorage.getItem('sortBy') || 'name';
 let currentSortOrder = localStorage.getItem('sortOrder') || 'asc';
@@ -36,6 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSearchLimit();
     setupKeyboardShortcuts();
     setupStickyHeaderScrolling(); // NEU: Scroll-Detection für Compact-Modus
+    
+    // NEU: Initialisiere Fuse.js Search Engine
+    initializeFuseSearch();
 });
 
 // VIEW SWITCHING SYSTEM
@@ -619,14 +626,9 @@ function applySavedSettingsToUI() {
     const sortOrderBtn = document.getElementById('sort-order-btn');
     if (sortOrderBtn) {
         if (currentSortOrder === 'asc') {
-            // Sicherstellen, dass der Text die aktuelle Sprache berücksichtigt (falls i18n geladen ist)
-            const text = (typeof t === 'function' && t('sortAscending') !== 'sortAscending') 
-                ? t('sortAscending') : '⬇️ Aufsteigend';
-            sortOrderBtn.textContent = '⬇️ ' + text.replace('⬇️ ', '');
+            sortOrderBtn.textContent = '⬇️ Aufsteigend';
         } else {
-            const text = (typeof t === 'function' && t('sortDescending') !== 'sortDescending') 
-                ? t('sortDescending') : '⬆️ Absteigend';
-            sortOrderBtn.textContent = '⬆️ ' + text.replace('⬆️ ', '');
+            sortOrderBtn.textContent = '⬆️ Absteigend';
         }
     }
 }
@@ -639,6 +641,60 @@ function setupEventListeners() {
         searchTimeout = setTimeout(() => {
             handleSearch(e.target.value);
         }, 150);
+    });
+    
+    // NEU: Tab-Taste für Autocomplete
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            const autocompleteDiv = document.getElementById('autocomplete-dropdown');
+            if (autocompleteDiv && !autocompleteDiv.classList.contains('hidden')) {
+                e.preventDefault(); // Verhindert Standard Tab-Verhalten
+                
+                // Wähle ersten Eintrag aus
+                const firstItem = autocompleteDiv.querySelector('.autocomplete-item');
+                if (firstItem && selectedAutocompleteIndex === -1) {
+                    // Index 0 auswählen
+                    selectedAutocompleteIndex = 0;
+                    highlightAutocompleteItem(selectedAutocompleteIndex);
+                }
+                
+                // Übernehme den ausgewählten Eintrag
+                if (selectedAutocompleteIndex >= 0) {
+                    const items = autocompleteDiv.querySelectorAll('.autocomplete-item');
+                    if (items[selectedAutocompleteIndex]) {
+                        const itemIndex = parseInt(items[selectedAutocompleteIndex].dataset.index);
+                        // Finde das Item aus den Suchergebnissen
+                        const query = searchInput.value;
+                        const results = fuseInstance ? fuseInstance.search(query).map(r => r.item) : [];
+                        if (results[itemIndex]) {
+                            selectAutocompleteItem(results[itemIndex]);
+                        }
+                    }
+                }
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            navigateAutocomplete(1);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            navigateAutocomplete(-1);
+        } else if (e.key === 'Enter') {
+            const autocompleteDiv = document.getElementById('autocomplete-dropdown');
+            if (autocompleteDiv && !autocompleteDiv.classList.contains('hidden') && selectedAutocompleteIndex >= 0) {
+                e.preventDefault();
+                const items = autocompleteDiv.querySelectorAll('.autocomplete-item');
+                if (items[selectedAutocompleteIndex]) {
+                    const itemIndex = parseInt(items[selectedAutocompleteIndex].dataset.index);
+                    const query = searchInput.value;
+                    const results = fuseInstance ? fuseInstance.search(query).map(r => r.item) : [];
+                    if (results[itemIndex]) {
+                        selectAutocompleteItem(results[itemIndex]);
+                    }
+                }
+            }
+        } else if (e.key === 'Escape') {
+            hideAutocomplete();
+        }
     });
 
     // Filter inventory (text filter)
@@ -759,7 +815,7 @@ async function loadCategories() {
         allBtn.className = 'category-btn';
         // ÄNDERUNG 4: Aktiver Zustand durch currentCategoryFilter gesteuert
         if (currentCategoryFilter === '') allBtn.classList.add('active');
-        allBtn.textContent = '📦 ' + t('categoryAll');
+        allBtn.textContent = '📦 Alle';
         allBtn.dataset.category = '';
         allBtn.addEventListener('click', function() {
             updateCategoryActiveState(this);
@@ -775,9 +831,7 @@ async function loadCategories() {
         favBtn.className = 'category-btn';
         // ÄNDERUNG 6: Aktiver Zustand durch currentCategoryFilter gesteuert
         if (currentCategoryFilter === 'Favorites') favBtn.classList.add('active');
-        // Versuche Übersetzung zu nutzen oder Fallback
-        const favText = (typeof t === 'function' && t('categoryFavorites') !== 'categoryFavorites') ? t('categoryFavorites') : 'Favorites';
-        favBtn.textContent = '⭐ ' + favText;
+        favBtn.textContent = '⭐ Favoriten';
         favBtn.dataset.category = 'Favorites';
         // Spezielles Styling für Favoriten-Button (optional via CSS data-category selector)
         favBtn.addEventListener('click', function() {
@@ -886,6 +940,90 @@ function setupKeyboardShortcuts() {
     });
 }
 
+// ==============================================
+// FUSE.JS SMART SEARCH
+// ==============================================
+
+// Initialisiere Fuse.js mit allen Items aus der Datenbank
+async function initializeFuseSearch() {
+    try {
+        console.log('🔍 Initialisiere Fuse.js...');
+        
+        // Hole alle Items aus der DB
+        const response = await fetch('/api/search_items_local?query=');
+        const items = await response.json();
+        
+        if (items && items.length > 0) {
+            allItemsForSearch = items;
+            
+            // Fuse.js Konfiguration - OPTIMIERT
+            const fuseOptions = {
+                keys: [
+                    { name: 'name', weight: 0.7 },      // Name höchste Priorität
+                    { name: 'category', weight: 0.2 },  // Kategorie mittlere Priorität
+                    { name: 'notes', weight: 0.1 }      // Notes niedrigste Priorität
+                ],
+                threshold: 0.6,              // Lockerer - findet auch Items mit extra Wörtern (Arms, Legs, etc.)
+                distance: 100,               // Maximale Distanz für Matches
+                minMatchCharLength: 2,       // Minimum 2 Zeichen
+                ignoreLocation: true,        // Position im String egal
+                findAllMatches: true,        // NEU: Findet alle Matches (wichtig für Multi-Token)
+                includeScore: true,          // Score für Ranking
+                includeMatches: true,        // Für Highlighting
+                shouldSort: true,            // NEU: Automatische Sortierung nach Score
+                useExtendedSearch: false     // Standard-Suche ausreichend
+            };
+            
+            fuseInstance = new Fuse(allItemsForSearch, fuseOptions);
+            console.log(`✅ Fuse.js bereit mit ${items.length} Items (Multi-Token aktiv)`);
+        }
+    } catch (error) {
+        console.error('Fehler beim Initialisieren von Fuse.js:', error);
+    }
+}
+
+let selectedAutocompleteIndex = -1;
+
+// NEU: Token-basierte Suche
+function tokenSearch(query, items) {
+    // Schritt 1: Query in Tokens aufteilen
+    const tokens = query.toLowerCase().split(/\s+/).filter(t => t.length >= 2);
+    
+    if (tokens.length === 0) return [];
+    
+    // Schritt 2: Items durchsuchen
+    const results = [];
+    
+    items.forEach(item => {
+        const itemName = item.name.toLowerCase();
+        let score = 0;
+        let matchedTokens = 0;
+        
+        // Prüfe jeden Token
+        tokens.forEach(token => {
+            if (itemName.includes(token)) {
+                matchedTokens++;
+                // Bonus: Token am Anfang = besser
+                if (itemName.startsWith(token)) {
+                    score += 3;
+                } else {
+                    score += 1;
+                }
+            }
+        });
+        
+        // NUR Items die ALLE Tokens haben!
+        if (matchedTokens === tokens.length) {
+            results.push({ item, score });
+        }
+    });
+    
+    // Schritt 3: Sortiere nach Score (höher = besser)
+    results.sort((a, b) => b.score - a.score);
+    
+    return results.map(r => r.item);
+}
+
 async function handleSearch(query) {
     // Trim whitespace from query
     query = query ? query.trim() : '';
@@ -893,29 +1031,35 @@ async function handleSearch(query) {
     if (!query || query.length < 2) {
         hideSearchResults();
         hideItemPreview();
+        hideAutocomplete();
         return;
     }
 
     try {
-        console.time('Search');
+        console.time('Token Search');
         
-        // Check cache first
-        let localResults;
-        if (searchCache[query]) {
-            console.log('✅ Using cached results for:', query);
-            localResults = searchCache[query];
+        let results = [];
+        
+        // NEU: Token-Suche statt Fuse.js
+        if (allItemsForSearch && allItemsForSearch.length > 0) {
+            results = tokenSearch(query, allItemsForSearch);
+            console.log(`🎯 Token-Suche gefunden: ${results.length} Items`);
         } else {
-            console.log('🔍 Searching database for:', query);
-            localResults = await api.search_items_local(query);
-            searchCache[query] = localResults;
+            // Fallback: normale Suche
+            console.log('⚠️ Items nicht geladen, Fallback-Suche...');
+            results = await api.search_items_local(query);
         }
         
         const limit = getSearchLimit();
-        const limitedResults = localResults ? localResults.slice(0, limit) : [];
+        const limitedResults = results ? results.slice(0, limit) : [];
         
-        displaySearchResults(limitedResults, localResults ? localResults.length : 0);
+        // NUR Search Results anzeigen (KEIN Autocomplete mehr!)
+        displaySearchResults(limitedResults, results ? results.length : 0);
         
-        console.timeEnd('Search');
+        // Autocomplete wird NICHT mehr angezeigt
+        hideAutocomplete();
+        
+        console.timeEnd('Token Search');
     } catch (error) {
         console.error('Search error:', error);
         const resultsDiv = document.getElementById('search-results');
@@ -924,11 +1068,121 @@ async function handleSearch(query) {
     }
 }
 
+// Autocomplete Dropdown anzeigen
+function displayAutocomplete(items, query) {
+    let autocompleteDiv = document.getElementById('autocomplete-dropdown');
+    
+    if (!autocompleteDiv) {
+        // Erstelle Autocomplete Dropdown
+        autocompleteDiv = document.createElement('div');
+        autocompleteDiv.id = 'autocomplete-dropdown';
+        autocompleteDiv.className = 'autocomplete-dropdown';
+        
+        // Append zum search-controls Container (hat position: relative)
+        const searchControls = document.querySelector('.search-controls');
+        if (searchControls) {
+            searchControls.appendChild(autocompleteDiv);
+        }
+    }
+    
+    if (!items || items.length === 0) {
+        hideAutocomplete();
+        return;
+    }
+    
+    autocompleteDiv.innerHTML = '';
+    selectedAutocompleteIndex = -1;
+    
+    items.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'autocomplete-item';
+        div.dataset.index = index;
+        
+        // Highlight matched text
+        const itemName = item.name;
+        const lowerName = itemName.toLowerCase();
+        const lowerQuery = query.toLowerCase();
+        
+        let highlightedName = itemName;
+        const matchIndex = lowerName.indexOf(lowerQuery);
+        
+        if (matchIndex !== -1) {
+            const before = itemName.substring(0, matchIndex);
+            const match = itemName.substring(matchIndex, matchIndex + query.length);
+            const after = itemName.substring(matchIndex + query.length);
+            highlightedName = `${before}<strong>${match}</strong>${after}`;
+        }
+        
+        div.innerHTML = highlightedName;
+        
+        div.addEventListener('click', () => {
+            selectAutocompleteItem(item);
+        });
+        
+        autocompleteDiv.appendChild(div);
+    });
+    
+    autocompleteDiv.classList.remove('hidden');
+}
+
+function hideAutocomplete() {
+    const autocompleteDiv = document.getElementById('autocomplete-dropdown');
+    if (autocompleteDiv) {
+        autocompleteDiv.classList.add('hidden');
+        selectedAutocompleteIndex = -1;
+    }
+}
+
+function selectAutocompleteItem(item) {
+    const searchInput = document.getElementById('search-input');
+    searchInput.value = item.name;
+    hideAutocomplete();
+    handleSearch(item.name);
+}
+
+// NEU: Navigiere durch Autocomplete mit Pfeiltasten
+function navigateAutocomplete(direction) {
+    const autocompleteDiv = document.getElementById('autocomplete-dropdown');
+    if (!autocompleteDiv || autocompleteDiv.classList.contains('hidden')) return;
+    
+    const items = autocompleteDiv.querySelectorAll('.autocomplete-item');
+    if (items.length === 0) return;
+    
+    // Berechne neuen Index
+    let newIndex = selectedAutocompleteIndex + direction;
+    
+    // Wrap around
+    if (newIndex < 0) newIndex = items.length - 1;
+    if (newIndex >= items.length) newIndex = 0;
+    
+    selectedAutocompleteIndex = newIndex;
+    highlightAutocompleteItem(selectedAutocompleteIndex);
+}
+
+// NEU: Highlight ausgewähltes Autocomplete-Item
+function highlightAutocompleteItem(index) {
+    const autocompleteDiv = document.getElementById('autocomplete-dropdown');
+    if (!autocompleteDiv) return;
+    
+    const items = autocompleteDiv.querySelectorAll('.autocomplete-item');
+    
+    // Entferne alle Highlights
+    items.forEach(item => item.classList.remove('selected'));
+    
+    // Setze neues Highlight
+    if (items[index]) {
+        items[index].classList.add('selected');
+        // Scrolle ins View
+        items[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+}
+
 function displaySearchResults(localResults, totalCount) {
     const resultsDiv = document.getElementById('search-results');
     resultsDiv.innerHTML = '';
 
     if (localResults && localResults.length > 0) {
+        // NEU: Nur Info-Text anzeigen wenn wir wirklich mehr haben als angezeigt
         if (totalCount && totalCount > localResults.length) {
             const infoDiv = document.createElement('div');
             infoDiv.style.padding = '8px';
@@ -936,7 +1190,22 @@ function displaySearchResults(localResults, totalCount) {
             infoDiv.style.color = '#ffa500';
             infoDiv.style.fontSize = '12px';
             infoDiv.style.borderBottom = '1px solid #444';
-            infoDiv.textContent = t('searchShowingResults', {shown: localResults.length, total: totalCount});
+            
+            // FIXED: Fallback für t() Funktion
+            let infoText = `Zeige ${localResults.length} von ${totalCount} Ergebnissen`;
+            if (typeof t === 'function') {
+                try {
+                    const translated = t('searchShowingResults', {shown: localResults.length, total: totalCount});
+                    // Prüfe ob Übersetzung ein String ist (nicht ein Objekt oder Funktion)
+                    if (typeof translated === 'string') {
+                        infoText = translated;
+                    }
+                } catch (e) {
+                    console.warn('Translation error:', e);
+                }
+            }
+            
+            infoDiv.textContent = infoText;
             resultsDiv.appendChild(infoDiv);
         }
         
@@ -951,7 +1220,20 @@ function displaySearchResults(localResults, totalCount) {
         
         resultsDiv.classList.remove('hidden');
     } else {
-        resultsDiv.innerHTML = `<div style="padding: 10px; color: #888;">${t('searchNoResults')}</div>`;
+        // FIXED: Fallback für t() Funktion
+        let noResultsText = 'Keine Ergebnisse gefunden';
+        if (typeof t === 'function') {
+            try {
+                const translated = t('searchNoResults');
+                if (typeof translated === 'string') {
+                    noResultsText = translated;
+                }
+            } catch (e) {
+                console.warn('Translation error:', e);
+            }
+        }
+        
+        resultsDiv.innerHTML = `<div style="padding: 10px; color: #888;">${noResultsText}</div>`;
         resultsDiv.classList.remove('hidden');
     }
 }
@@ -1420,19 +1702,44 @@ function createInventoryItem(item) {
 }
 
 function filterInventory(query) {
-    // Trim and normalize query
-    query = query ? query.trim().toLowerCase() : '';
+    // Trim query
+    query = query ? query.trim() : '';
     
     const items = document.querySelectorAll('.inventory-item');
     
-    items.forEach(item => {
-        const name = (item.dataset.name || '').toLowerCase();
-        if (!query || name.includes(query)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    });
+    // Wenn leer: alles zeigen
+    if (!query || query.length < 2) {
+        items.forEach(item => item.style.display = 'block');
+        return;
+    }
+    
+    // NEU: Token-Suche statt Fuse.js
+    if (allItemsForSearch && allItemsForSearch.length > 0) {
+        const results = tokenSearch(query, allItemsForSearch);
+        const matchedNames = new Set(results.map(r => r.name));
+        
+        items.forEach(item => {
+            const name = item.dataset.name;
+            if (matchedNames.has(name)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        console.log(`🎯 Token-Filter: ${matchedNames.size} von ${items.length} Items gefunden`);
+    } else {
+        // Fallback: Simples String-Matching
+        const lowerQuery = query.toLowerCase();
+        items.forEach(item => {
+            const name = (item.dataset.name || '').toLowerCase();
+            if (name.includes(lowerQuery)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
 }
 
 async function showItemModal(item) {

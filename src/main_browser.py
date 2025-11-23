@@ -131,6 +131,26 @@ class GearCrateAPIHandler(SimpleHTTPRequestHandler):
                 self.send_error(500, str(e))
                 return
         
+        # NEU: Search Items Local (für Fuse.js Initialisierung)
+        if path == '/api/search_items_local':
+            try:
+                query = query_params.get('query', [''])[0]
+                result = GearCrateAPIHandler.api.search_items_local(query)
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(result).encode())
+                return
+            
+            except Exception as e:
+                print(f"❌ Error searching items: {e}")
+                import traceback
+                traceback.print_exc()
+                self.send_error(500, str(e))
+                return
+        
         # GEAR SETS API
         if path == '/api/get_all_gear_sets':
             try:

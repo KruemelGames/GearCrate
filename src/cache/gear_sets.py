@@ -73,6 +73,10 @@ class GearSetsManager:
         item_name = "ADP Core Black"
         base_name = "ADP Core"
         Return = "Black"
+        
+        item_name = "Citadel Core Base"
+        base_name = "Citadel Core"
+        Return = "Base"
         """
         if not item_name.startswith(base_name):
             return None
@@ -80,10 +84,11 @@ class GearSetsManager:
         # Entferne Base-Name, z.B. "ADP Core Black" -> "Black"
         variant = item_name[len(base_name):].strip()
         
-        # Wenn leer, ist es die Basis-Variante
-        if not variant or variant == '(Modified)':
+        # Wenn leer, ist es die Standard-Variante (ohne Farbe)
+        if not variant:
             return 'Base'
         
+        # Alle anderen Varianten bleiben wie sie sind
         return variant
     
     def get_set_pieces(self, db_connection, set_name, variant=''):
@@ -106,7 +111,7 @@ class GearSetsManager:
         pieces = {}
         
         # Baue die korrekten Namen für jedes Teil
-        if variant and variant != 'Base':
+        if variant:
             helmet_name = f"{set_def['helmet']} {variant}"
             core_name = f"{set_def['core']} {variant}"
             arms_name = f"{set_def['arms']} {variant}"
