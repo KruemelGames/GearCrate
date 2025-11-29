@@ -10,6 +10,7 @@ let currentView = localStorage.getItem('currentView') || 'inventory';
 let currentGearSetsFilter = 'all';
 let currentSelectedSet = 'ADP';
 let loadedSets = {}; // Speichert geladene Sets
+let favoriteGearSets = JSON.parse(localStorage.getItem('favoriteGearSets') || '[]'); // Array von "SetName Variant"
 
 // NEU: Fuse.js Search Engine
 let fuseInstance = null;
@@ -119,6 +120,90 @@ async function reloadInvalidatedSets() {
         
         displayGearSets();
     }
+}
+
+// FAVORITE GEAR SETS HELPERS
+function getGearSetKey(setName, variant) {
+    return `${setName}|||${variant}`;
+}
+
+function isGearSetFavorite(setName, variant) {
+    const key = getGearSetKey(setName, variant);
+    return favoriteGearSets.includes(key);
+}
+
+function toggleGearSetFavorite(setName, variant) {
+    const key = getGearSetKey(setName, variant);
+    const index = favoriteGearSets.indexOf(key);
+
+    if (index >= 0) {
+        // Remove from favorites
+        favoriteGearSets.splice(index, 1);
+    } else {
+        // Add to favorites
+        favoriteGearSets.push(key);
+    }
+
+    // Save to localStorage
+    localStorage.setItem('favoriteGearSets', JSON.stringify(favoriteGearSets));
+    console.log(`⭐ Gear Set ${setName} ${variant} favorite: ${index < 0}`);
+}
+
+// PLACEHOLDER ICON HELPER
+function getPlaceholderIcon(itemType) {
+    const validTypes = [
+        'Arms', 'Backpack', 'Eyes', 'Hands', 'Hat', 'Helmet',
+        'Jacket', 'Jumpsuit', 'Legs', 'Pants', 'Shirt', 'Shoes',
+        'Torso', 'Undersuit'
+    ];
+
+    // Normalize item type (case-insensitive match)
+    const normalizedType = validTypes.find(t =>
+        t.toLowerCase() === (itemType || '').toLowerCase()
+    );
+
+    if (normalizedType) {
+        return `/cache/Placeholder/${normalizedType}.png`;
+    }
+
+    return null; // Kein Placeholder verfügbar
+}
+
+// GET ITEM ICON - Intelligente Fallback-Logik
+function getItemIcon(item, size = 'medium') {
+    // size kann sein: 'thumb', 'medium', oder 'full'
+
+    // 1. Prüfe ob lokales gecachtes Bild vorhanden (icon_url zeigt auf /cache/)
+    if (item.icon_url && item.icon_url.startsWith('/cache/')) {
+        let imageUrl = item.icon_url;
+
+        // Konvertiere zu gewünschter Größe
+        if (size === 'thumb' && imageUrl.endsWith('.png')) {
+            return imageUrl.replace(/\.png$/, '_thumb.png');
+        } else if (size === 'medium' && imageUrl.endsWith('.png')) {
+            return imageUrl.replace(/\.png$/, '_medium.png');
+        }
+
+        return imageUrl;
+    }
+
+    // 2. Kein lokales Bild → Versuche Placeholder
+    // (Auch wenn image_url existiert, wenn es nicht lokal gecacht ist, zeigen wir Placeholder)
+    // Spezial-Fall: 'core' → 'Torso' für Gear-Sets
+    let itemType = item.item_type || item.type;
+    if (!itemType && item.partType) {
+        itemType = item.partType === 'core' ? 'Torso' : item.partType;
+    } else if (itemType && itemType.toLowerCase() === 'core') {
+        itemType = 'Torso';
+    }
+
+    const placeholderPath = getPlaceholderIcon(itemType);
+    if (placeholderPath) {
+        return placeholderPath;
+    }
+
+    // 3. Kein Placeholder → null (Aufrufer zeigt dann 🎮)
+    return null;
 }
 
 // GEAR SETS LADEN
@@ -302,18 +387,23 @@ function displayGearSets() {
     }
     
     let variantsToShow = variants;
-    
-    // Filter nach Completion-Status
+
+    // Filter nach Completion-Status oder Favorites
     if (currentGearSetsFilter !== 'all') {
         variantsToShow = variantsToShow.filter(v => {
             const ownedCount = v.owned_count;
-            
+
+            // Favorites Filter: Set muss in localStorage favorites sein
+            if (currentGearSetsFilter === 'favorites') {
+                return isGearSetFavorite(v.set_name, v.variant);
+            }
+
             if (currentGearSetsFilter === 'none') return ownedCount === 0;
             if (currentGearSetsFilter === '1') return ownedCount === 1;
             if (currentGearSetsFilter === '2') return ownedCount === 2;
             if (currentGearSetsFilter === '3') return ownedCount === 3;
             if (currentGearSetsFilter === 'all-parts') return ownedCount === 4;
-            
+
             return true;
         });
     }
@@ -340,13 +430,14 @@ function updateFilterButtonCounts(variants) {
     // Zähle Sets nach Kategorie
     const counts = {
         all: variants.length,
+        favorites: 0,
         none: 0,
         one: 0,
         two: 0,
         three: 0,
         complete: 0
     };
-    
+
     variants.forEach(v => {
         const owned = v.owned_count;
         if (owned === 0) counts.none++;
@@ -354,19 +445,28 @@ function updateFilterButtonCounts(variants) {
         else if (owned === 2) counts.two++;
         else if (owned === 3) counts.three++;
         else if (owned === 4) counts.complete++;
+
+        // Count favorites (aus localStorage)
+        if (isGearSetFavorite(v.set_name, v.variant)) {
+            counts.favorites++;
+        }
     });
-    
+
     // Update Button-Texte
     const filterBtns = document.querySelectorAll('.filter-btn');
     filterBtns.forEach(btn => {
         const filter = btn.dataset.filter;
         let count = 0;
         let baseText = '';
-        
+
         switch(filter) {
             case 'all':
                 count = counts.all;
                 baseText = 'Alle';
+                break;
+            case 'favorites':
+                count = counts.favorites;
+                baseText = '⭐ Favorites';
                 break;
             case 'none':
                 count = counts.none;
@@ -389,12 +489,12 @@ function updateFilterButtonCounts(variants) {
                 baseText = '🟢 ALL (4/4)';
                 break;
         }
-        
+
         // Update Button-Text mit Count
         btn.textContent = `${baseText} (${count})`;
     });
-    
-    console.log(`✅ Filter Counts: Alle=${counts.all}, None=${counts.none}, 1/4=${counts.one}, 2/4=${counts.two}, 3/4=${counts.three}, 4/4=${counts.complete}`);
+
+    console.log(`✅ Filter Counts: Alle=${counts.all}, Favorites=${counts.favorites}, None=${counts.none}, 1/4=${counts.one}, 2/4=${counts.two}, 3/4=${counts.three}, 4/4=${counts.complete}`);
 }
 
 // NEU: Refresh ein spezifisches Set nach Item-Änderung (OPTIMIERT)
@@ -508,14 +608,14 @@ function createGearSetCard(setData) {
     // Header
     const header = document.createElement('div');
     header.className = 'gearset-header';
-    
+
     const name = document.createElement('div');
     name.className = 'gearset-name';
     name.textContent = `${setData.set_name} ${setData.variant}`;
-    
+
     const status = document.createElement('div');
     status.className = 'gearset-status';
-    
+
     if (ownedCount === 4) {
         status.classList.add('status-complete');
         status.textContent = 'ALL (4/4)';
@@ -526,9 +626,34 @@ function createGearSetCard(setData) {
         status.classList.add('status-partial');
         status.textContent = `${ownedCount}/4`;
     }
-    
+
     header.appendChild(name);
     header.appendChild(status);
+
+    // Favorite Button for the whole set
+    const setFavBtn = document.createElement('button');
+    setFavBtn.className = 'favorite-btn gearset-favorite-btn';
+
+    // Check if set is favorite (from localStorage)
+    const isFavorite = isGearSetFavorite(setData.set_name, setData.variant);
+
+    if (isFavorite) {
+        setFavBtn.classList.add('is-favorite');
+        setFavBtn.textContent = '⭐';
+    } else {
+        setFavBtn.textContent = '☆';
+    }
+
+    // Toggle favorite for this set (localStorage only, no API calls)
+    setFavBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleGearSetFavorite(setData.set_name, setData.variant);
+
+        // Re-render the sets to update UI
+        displayGearSets();
+    });
+
+    header.appendChild(setFavBtn);
     card.appendChild(header);
     
     // Parts Grid (2x2)
@@ -550,17 +675,31 @@ function createGearSetCard(setData) {
                 partDiv.classList.add('missing');
             }
             
-            // Bild
-            if (piece.image_url) {
+            // Bild mit Placeholder-Fallback
+            // Füge partType zum piece-Objekt hinzu für getItemIcon
+            piece.partType = partType;
+            const iconUrl = getItemIcon(piece, 'medium');
+            if (iconUrl) {
                 const img = document.createElement('img');
-                // Ändere image_url zu medium: ersetze .png mit _medium.png
-                let mediumUrl = piece.image_url;
-                if (mediumUrl.endsWith('.png')) {
-                    mediumUrl = mediumUrl.replace(/\.png$/, '_medium.png');
-                }
-                img.src = mediumUrl;
+                img.src = iconUrl;
                 img.alt = partType;
+                img.onerror = function() {
+                    // Wenn Bild fehlt, zeige nichts (Placeholder wurde bereits versucht)
+                    this.style.display = 'none';
+                };
                 partDiv.appendChild(img);
+            } else {
+                // Kein Bild und kein Placeholder verfügbar
+                // Zeige einen generischen Placeholder
+                const placeholderDiv = document.createElement('div');
+                placeholderDiv.style.height = '100px';
+                placeholderDiv.style.display = 'flex';
+                placeholderDiv.style.alignItems = 'center';
+                placeholderDiv.style.justifyContent = 'center';
+                placeholderDiv.style.fontSize = '32px';
+                placeholderDiv.style.color = '#666';
+                placeholderDiv.textContent = '🎮';
+                partDiv.appendChild(placeholderDiv);
             }
             
             // Name
@@ -568,7 +707,7 @@ function createGearSetCard(setData) {
             partName.className = 'part-name';
             partName.textContent = partType.toUpperCase();
             partDiv.appendChild(partName);
-            
+
             // KLICKBAR MACHEN!
             if (piece.name) {
                 partDiv.style.cursor = 'pointer';
@@ -645,11 +784,18 @@ function setupEventListeners() {
     
     // NEU: Tab-Taste für Autocomplete
     searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Tab') {
+        if (e.key === 'Escape') {
+            // ESC löscht den Suchtext
+            e.preventDefault();
+            searchInput.value = '';
+            hideAutocomplete();
+            hideSearchResults();
+            hideItemPreview();
+        } else if (e.key === 'Tab') {
             const autocompleteDiv = document.getElementById('autocomplete-dropdown');
             if (autocompleteDiv && !autocompleteDiv.classList.contains('hidden')) {
                 e.preventDefault(); // Verhindert Standard Tab-Verhalten
-                
+
                 // Wähle ersten Eintrag aus
                 const firstItem = autocompleteDiv.querySelector('.autocomplete-item');
                 if (firstItem && selectedAutocompleteIndex === -1) {
@@ -657,7 +803,7 @@ function setupEventListeners() {
                     selectedAutocompleteIndex = 0;
                     highlightAutocompleteItem(selectedAutocompleteIndex);
                 }
-                
+
                 // Übernehme den ausgewählten Eintrag
                 if (selectedAutocompleteIndex >= 0) {
                     const items = autocompleteDiv.querySelectorAll('.autocomplete-item');
@@ -725,9 +871,11 @@ function setupEventListeners() {
             currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
             // Update button text
             if (currentSortOrder === 'asc') {
-                this.textContent = '⬇️ ' + t('sortAscending').replace('⬇️ ', '');
+                const text = t('sortAscending') || '⬇️ Aufsteigend';
+                this.textContent = '⬇️ ' + (typeof text === 'string' ? text.replace('⬇️ ', '') : 'Aufsteigend');
             } else {
-                this.textContent = '⬆️ ' + t('sortDescending').replace('⬆️ ', '');
+                const text = t('sortDescending') || '⬆️ Absteigend';
+                this.textContent = '⬆️ ' + (typeof text === 'string' ? text.replace('⬆️ ', '') : 'Absteigend');
             }
             // ÄNDERUNG 3: Sortierreihenfolge speichern
             saveSortAndFilterSettings();
@@ -749,6 +897,11 @@ function setupEventListeners() {
     const searchLimitSelect = document.getElementById('search-limit');
     searchLimitSelect.addEventListener('change', function(e) {
         saveSearchLimit(parseInt(e.target.value));
+        // Trigger search again without clearing the input
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && searchInput.value) {
+            handleSearch(searchInput.value);
+        }
     });
 }
 
@@ -1244,8 +1397,40 @@ function createSearchResultItem(item) {
     div.style.display = 'flex';
     div.style.alignItems = 'center';
     div.style.gap = '5px';
-    
-    // Minus button (JETZT LINKS)
+
+    // Use THUMB for search results (klein, schnell) - JETZT ZUERST!
+    const iconUrl = getItemIcon(item, 'thumb');
+    if (iconUrl) {
+        const img = document.createElement('img');
+        img.src = iconUrl;
+        img.className = 'search-item-thumbnail';
+        img.alt = item.name;
+        img.style.width = '32px';
+        img.style.height = '32px';
+        img.style.objectFit = 'contain';
+        img.style.marginLeft = '8px';
+        img.style.marginRight = '8px';
+        img.loading = 'lazy';
+        img.onerror = function() {
+            // Fallback zum Gamecontroller wenn Bild fehlt
+            const icon = document.createElement('span');
+            icon.style.fontSize = '24px';
+            icon.style.marginLeft = '8px';
+            icon.style.marginRight = '8px';
+            icon.textContent = '🎮';
+            this.replaceWith(icon);
+        };
+        div.appendChild(img);
+    } else {
+        const icon = document.createElement('span');
+        icon.style.fontSize = '24px';
+        icon.style.marginLeft = '8px';
+        icon.style.marginRight = '8px';
+        icon.textContent = '🎮';
+        div.appendChild(icon);
+    }
+
+    // Minus button
     const minusBtn = document.createElement('button');
     minusBtn.textContent = '−';
     minusBtn.className = 'search-quick-btn search-btn-minus';
@@ -1258,57 +1443,27 @@ function createSearchResultItem(item) {
             // Finde die Zahl-Anzeige DIREKT (im gleichen div)
             const parentDiv = e.target.closest('.search-result-item');
             const countSpan = parentDiv.querySelector('.search-item-count');
-            
+
             await quickUpdateCount(item, -1, countSpan, minusBtn);
         }
     });
     div.appendChild(minusBtn);
-    
-    // Plus button (JETZT LINKS)
+
+    // Plus button
     const plusBtn = document.createElement('button');
     plusBtn.textContent = '+';
     plusBtn.className = 'search-quick-btn search-btn-plus';
     plusBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        
+
         // Finde die Zahl-Anzeige DIREKT (im gleichen div)
         const parentDiv = e.target.closest('.search-result-item');
         const countSpan = parentDiv.querySelector('.search-item-count');
         const minusBtnInDiv = parentDiv.querySelector('.search-btn-minus');
-        
+
         await quickUpdateCount(item, 1, countSpan, minusBtnInDiv);
     });
     div.appendChild(plusBtn);
-    
-    // Use THUMB for search results (klein, schnell)
-    if (item.icon_url) {
-        const img = document.createElement('img');
-        // Konvertiere zu thumb: .png → _thumb.png
-        let thumbUrl = item.icon_url;
-        if (thumbUrl.endsWith('.png')) {
-            thumbUrl = thumbUrl.replace(/\.png$/, '_thumb.png');
-        }
-        img.src = thumbUrl;
-        img.className = 'search-item-thumbnail';
-        img.alt = item.name;
-        img.style.width = '32px';
-        img.style.height = '32px';
-        img.style.objectFit = 'contain';
-        img.style.marginLeft = '8px';
-        img.style.marginRight = '8px';
-        img.loading = 'lazy';
-        img.onerror = function() {
-            this.style.display = 'none';
-        };
-        div.appendChild(img);
-    } else {
-        const icon = document.createElement('span');
-        icon.style.fontSize = '24px';
-        icon.style.marginLeft = '8px';
-        icon.style.marginRight = '8px';
-        icon.textContent = '🎮';
-        div.appendChild(icon);
-    }
     
     // Item name
     const nameSpan = document.createElement('span');
@@ -1574,15 +1729,11 @@ function createInventoryItem(item) {
     div.dataset.name = item.name;
     div.style.position = 'relative';
     
-    // Use MEDIUM for inventory grid
-    if (item.thumb_url) {
+    // Use MEDIUM for inventory grid with intelligent fallback
+    const iconUrl = getItemIcon(item, 'medium');
+    if (iconUrl) {
         const img = document.createElement('img');
-        // Konvertiere zu medium: .png → _medium.png
-        let mediumUrl = item.thumb_url;
-        if (mediumUrl.endsWith('.png')) {
-            mediumUrl = mediumUrl.replace(/\.png$/, '_medium.png');
-        }
-        img.src = mediumUrl;
+        img.src = iconUrl;
         img.alt = item.name;
         img.style.width = '100%';
         img.style.height = '120px';

@@ -80,7 +80,7 @@ class API:
 
     def add_item(self, name, item_type=None, image_url=None, notes=None, initial_count=1, properties_json=None):
         """Adds an item to the inventory"""
-        
+
         # 1. Details und Properties scrapen, wenn URL fehlt
         if not image_url:
             print(f"INFO: No image_url provided for {name}, attempting to scrape full details...")
@@ -94,11 +94,44 @@ class API:
         # 2. Bild herunterladen und cachen
         image_path = None
         if image_url:
-            image_path = self.cache.download_and_cache(image_url, name)
-            
-        # 3. In DB speichern
-        result = self.operations.add_item(name, item_type, image_url, image_path, notes, initial_count, properties_json)
-        
+            # Check if already cached
+            cached_path = self.cache.get_cached_path(image_url, item_type)
+            if cached_path:
+                image_path = cached_path
+            else:
+                # Download image to temporary file first
+                import tempfile
+                import requests
+                import os as os_lib
+                try:
+                    response = requests.get(image_url, timeout=10)
+                    if response.status_code == 200:
+                        # Save to temporary file
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
+                            tmp_file.write(response.content)
+                            tmp_path = tmp_file.name
+
+                        # Save to cache (this also generates thumbnails)
+                        image_path = self.cache.save_image(image_url, tmp_path, item_type)
+
+                        # Clean up temp file
+                        try:
+                            os_lib.remove(tmp_path)
+                        except:
+                            pass
+                except Exception as e:
+                    print(f"Error downloading image for {name}: {e}")
+
+        # 3. In DB speichern (ohne properties_json wenn die Spalte nicht existiert)
+        try:
+            result = self.operations.add_item(name, item_type, image_url, image_path, notes, initial_count, properties_json)
+        except Exception as e:
+            # Falls properties_json Spalte nicht existiert, versuche ohne
+            if 'properties_json' in str(e):
+                result = self.operations.add_item(name, item_type, image_url, image_path, notes, initial_count)
+            else:
+                raise e
+
         return result
 
     def update_item_count(self, name, count):
@@ -355,3 +388,22 @@ class API:
             return {'success': True, 'variants': variants}
         except Exception as e:
             return {'success': False, 'error': str(e)}
+
+    # =========================================================
+    # BULK IMPORT FUNKTIONEN
+    # =========================================================
+
+    def get_category_items(self, category_url):
+        """
+        Holt alle Items einer Kategorie von CStone.space
+        category_url: z.B. 'FPSArmors?type=Torsos' oder 'FPSClothes?type=Hat'
+        Returns: List of items with name and image_url
+        """
+        try:
+            items = self.scraper.get_category_items(category_url)
+            return items
+        except Exception as e:
+            print(f"Error in get_category_items: {e}")
+            import traceback
+            traceback.print_exc()
+            raise e
