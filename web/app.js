@@ -20,12 +20,16 @@ let allItemsForSearch = [];
 function safeT(key, params) {
     if (typeof window.t === 'function') {
         try {
-            return window.t(key, params);
+            const result = window.t(key, params);
+            // CRITICAL: Ensure we only return strings, never functions or objects
+            if (typeof result === 'string' && result.length > 0) {
+                return result;
+            }
         } catch (e) {
             console.warn('Translation error:', e);
         }
     }
-    // Fallback messages
+    // Fallback messages (always return a string)
     const fallbacks = {
         'inventoryEmpty': 'Inventar ist leer',
         'inventoryLoadError': 'Fehler beim Laden des Inventars',
@@ -2387,7 +2391,12 @@ function displayImportResults() {
         ? importFoundItems.filter(item => item.item_type === currentImportCategoryFilter)
         : importFoundItems;
 
-    document.getElementById('found-count').textContent = filteredItems.length;
+    // Calculate unique items count and total items count
+    const uniqueCount = filteredItems.length;
+    const totalCount = filteredItems.reduce((sum, item) => sum + (item.count || 0), 0);
+
+    document.getElementById('found-unique-count').textContent = uniqueCount;
+    document.getElementById('found-total-count').textContent = totalCount;
     document.getElementById('notfound-count').textContent = importNotFoundItems.length;
 
     const grid = document.getElementById('import-found-grid');

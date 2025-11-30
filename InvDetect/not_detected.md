@@ -6,6 +6,8 @@
 @item Name Ina vest 01 0 1 01 - Page 1, Row 15, Col 3
 @item Name Ina vest ol 0 1 01 - Page 1, Row 16, Col 2
 @item Name Ina vest ol 0 1 0l - Page 1, Row 15, Col 3
+@item Name Ina vest ol 0 IHol - Page 1, Row 16, Col 2
+@item Name Inal vest o1 0 1401 - Page 1, Row 17, Col 1
 @item Name dmc gloves 01 0h 02 - Page 1, Row 7, Col 1
 @item Name dmc gloves 0l 0 02 - Page 7, Row 110, Col 2
 @item Name dmc gloves_ 01 oil 02 - Page 1, Row 7, Col 2
@@ -20,6 +22,7 @@
 @item Name dmc_gloves 01 o 02 - Page 1, Row 7, Col 2
 @item Name dmc_gloves 01 oi 02 - Page 1, Row 7, Col 2
 @item Name dmc_gloves 01 ol 02 - Page 1, Row 7, Col 1
+@item Name dmc_gloves_ 01 0il 02 - Page 1, Row 7, Col 2
 @item Name_Ina vest 1 01 0 - Page 1, Row 16, Col 2
 Ambrus Suit - Page 1, Row 20, Col 1; Page 1, Row 20, Col 3
 Aril Legs Modified) - Page 4, Row 21, Col 1; Page 4, Row 69, Col 1

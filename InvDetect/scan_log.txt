@@ -1,96 +1,143 @@
-[21:27:40] 
+[01:11:13] 
 === InvDetect - Star Citizen Universal Inventory Scanner ===
-[21:27:40] INSERT → Start Scan | DELETE → Stop | ESC → Exit
+[01:11:13] INSERT → Start Scan | DELETE → Stop | ESC → Exit
 
-[21:27:40] 
+[01:11:13] 
 [INFO] Scan mode: 1x1 (Normal)
-[21:27:40] Press INSERT to start scan, or ESC to exit...
-[21:27:42] 
+[01:11:13] Press INSERT to start scan, or ESC to exit...
+[01:11:19] 
 [WINDOW] Searching for StarCitizen.exe process...
-[21:27:42] [WINDOW] Found StarCitizen.exe (PID: 4244)
-[21:27:42] [WINDOW] Switched to: Star Citizen 
-[21:27:43] [INFO] Output file created: detected_items.txt
-[21:27:43] 
+[01:11:19] [WINDOW] Found StarCitizen.exe (PID: 31536)
+[01:11:19] [WINDOW] Switched to: Star Citizen 
+[01:11:19] [INFO] Output file created: detected_items.txt
+[01:11:19] 
 ================================================================================
-[21:27:43] SCAN STARTED - Mode: 1x1 (Normal)
-[21:27:43] Rows/Block: 8 | Step: 97px | Blocks: 3
-[21:27:43] ================================================================================
+[01:11:19] SCAN STARTED - Mode: 1x1 (Normal)
+[01:11:19] Rows/Block: 8 | Step: 97px | Blocks: 3
+[01:11:19] ================================================================================
 
-[21:27:43] Scrolling to top...
-[21:27:46] Reset complete
-[21:27:46] 
+[01:11:19] Scrolling to top...
+[01:11:23] Reset complete
+[01:11:23] 
 ================================================================================
-[21:27:46] PAGE #1
-[21:27:46] ================================================================================
+[01:11:23] PAGE #1
+[01:11:23] ================================================================================
 
-[21:27:46] 
+[01:11:23] 
 === SCANNING BLOCK 1 ===
-[21:27:46]   Block 1: 8 rows, 97px step, drift -0px
-[21:27:48]   → Arcus Gloves Teal (#1)
-[21:27:49]   → Davin Work Gloves Red (#1)
-[21:27:51]   → Adroit Gloves Olive (#1)
-[21:27:52]   → Cody Gloves (#1)
-[21:27:53]   → Adroit Gloves Indigo (#1)
-[21:27:55]   → Baru Gloves Viridian (Left Only) (#1)
-[21:27:56]   → Mercury Gloves (Modified 9T) (#1)
-[21:27:57]   → Debnam Gloves Orange (#1)
-[21:27:59]   → Badami Gloves Deadwood (#1)
-[21:28:00]   → Badami Gloves Deadwood (#2)
-[21:28:01]   → Badami Gloves Deadwood (#3)
-[21:28:03]   → Ventra Gloves Black (#1)
-[21:28:04]   → Davin Work Gloves Red (#2)
-[21:28:05]   → Cody Gloves (#2)
-[21:28:07]   → Ixonia Gloves Green (#1)
-[21:28:08]   → Debnam Gloves Olive (#1)
-[21:28:09]     [RETRY] OCR text found but no DB match → max attempts: 5
-[21:28:09]     [RETRY] 1/5: No DB match for 'Z1uf Gloves'
-[21:28:11]     [RETRY] 2/5: No DB match for 'Z1uf Gloves'
-[21:28:12]     [RETRY] 3/5: No DB match for 'Z1uf Gloves'
-[21:28:13]     [RETRY] 4/5: No DB match for 'Z1uf Gloves'
-[21:28:14]     [FAILED] OCR: 'Z1uf Gloves' - No DB match after 5 attempts
-[21:28:16]   → Arcus Gloves Yellow (#1)
-[21:28:17]   → Debnam Gloves Orange (#2)
-[21:28:18]   → Fractus Gloves Maroon (#1)
-[21:28:19]   → Debnam Gloves (Modified 9T) (#1)
-[21:28:21]   → Badami Gloves Deadwood (#4)
-[21:28:22]   → Davin Work Gloves Seagreen (#1)
-[21:28:24]   → Adroit Gloves Indigo (#2)
-[21:28:25]     [RETRY] OCR text found but no DB match → max attempts: 5
-[21:28:25]     [RETRY] 1/5: No DB match for '@item Name dmc_gloves 01 0il 02'
-[21:28:26]     [RETRY] 2/5: No DB match for '@item Name dmc_gloves 01 0il 02'
-[21:28:28]     [RETRY] 3/5: No DB match for '@item Name dmc_gloves 01 0il 02'
-[21:28:29]     [RETRY] 4/5: No DB match for '@item Name dmc_gloves 01 0il 02'
-[21:28:30]     [FAILED] OCR: '@item Name dmc_gloves 01 0il 02' - No DB match after 5 attempts
-[21:28:32]     [RETRY] OCR text found but no DB match → max attempts: 5
-[21:28:32]     [RETRY] 1/5: No DB match for '@item Name dmc_gloves 01 0il 02'
-[21:28:33]     [RETRY] 2/5: No DB match for '@item Name dmc_gloves 01 0il 02'
-[21:28:34]     [RETRY] 3/5: No DB match for '@item Name dmc_gloves 01 0il 02'
-[21:28:36]     [RETRY] 4/5: No DB match for '@item Name dmc_gloves 01 0il 02'
-[21:28:37]     [FAILED] OCR: '@item Name dmc_gloves 01 0il 02' - No DB match after 5 attempts
-[21:28:39]   → Adroit Gloves Sage (#1)
-[21:28:40]   → Adroit Gloves Olive (#2)
-[21:28:41]   → Adroit Gloves Indigo (#3)
-[21:28:42]   → Badami Gloves Deadwood (#5)
-[21:28:44]   → Ventra Gloves Blue (#1)
-[21:28:45]   → Grappler Gloves Veritas (#1)
-[21:28:45]   Items found
-[21:28:45]   Scrollbar detection (distance: 322px)...
-[21:28:45]   [NO_SCROLLBAR] Scrollbar not found - no scrolling needed
-[21:28:45] [NO_SCROLLBAR] No scrollbar detected - ending scan
-[21:28:45] 
-Scan finished!
-[21:28:45] Mouse stopped
-[21:28:45] 
-[RESULTS] 29 items scanned (19 unique)
-[21:28:45] [RESULTS] Saved to detected_items.txt
-[21:28:45] [NOT DETECTED] 2 new unmatched items (27 total)
-[21:28:45] [NOT DETECTED] Saved to not_detected.md
-[21:28:45] 
+[01:11:23]   Block 1: 8 rows, 97px step, drift -0px
+[01:11:25]   → Edgewear Pants Tan (#1)
+[01:11:26]   → Carrion Arms Maniac (#1)
+[01:11:28]   → Wrecker Core (#1)
+[01:11:29]   → Nyman Jacket Yellow (#1)
+[01:11:30]   → ADP-mk4 Arms (Modified) (#1)
+[01:11:31]   → ADP-mk4 Core (Modified) (#1)
+[01:11:33]   → ADP-mk4 Legs (Modified) (#1)
+[01:11:34]   → The Butcher Helmet (#1)
+[01:11:36]   → Stoneskin Helmet Desert (#1)
+[01:11:37]   → Venture Core Olive (#1)
+[01:11:38]   → Morozov-SH Arms Smokescreen (#1)
+[01:11:40]   → Balor HCH Helmet Orange (#1)
+[01:11:41]   → MacFlex Legs Green (#1)
+[01:11:42]   → ORC-mkX Arms Twilight (#1)
+[01:11:44]   → Horizon Helmet White (#1)
+[01:11:45]   → Inmate Workpack (#1)
+[01:11:47]   → MacFlex Arms Blue (#1)
+[01:11:48]   → Argus Helmet Black/Aqua/Silver (#1)
+[01:11:49]   → Aril Helmet (#1)
+[01:11:51]   → Venture Arms Dark Green (#1)
+[01:11:53]   → CBH-3 Helmet Olive (#1)
+[01:11:54]   → Aztalan Galena Arms (#1)
+[01:11:55]   → Lynx Core Violet (#1)
+[01:11:57]   → PAB-1 Core Imperial (#1)
+[01:11:58]   → G-2 Helmet Aqua (#1)
+[01:11:59]   → ORC-mkX Helmet Nightfire (#1)
+[01:12:01]   → Carrion Helmet Stalker (#1)
+[01:12:02]   → Morningstar Helmet Grey (#1)
+[01:12:04]   → Horizon Helmet White (#2)
+[01:12:05]   → Horizon Helmet White (#3)
+[01:12:06]   → Horizon Helmet White (#4)
+[01:12:08]   → Brocius Waist Apron (#1)
+[01:12:08]   Items found
+[01:12:08]   Scrollbar detection (distance: 322px)...
+[01:12:08]   Scrollbar found: Y=352, Bottom=485, Height=266px
+[01:12:08]   Dragging from X=1795, Y=352, distance=322px
+[01:12:09]   Scrolled (block 1)
+[01:12:09] 
+=== SCANNING BLOCK 2 ===
+[01:12:09]   Block 2: 8 rows, 97px step, drift -0px
+[01:12:11]   → Balor HCH Helmet Olive (#1)
+[01:12:12]   → Inquisitor Arms Outcrop (#1)
+[01:12:13]   → ORC-mkV Core Cry-Astro Edition (#1)
+[01:12:15]   → Horizon Helmet White (#5)
+[01:12:16]   → Keldur Hat and Oak Goggles (#1)
+[01:12:18]   → Arden-CL Backpack Balefire (#1)
+[01:12:19]   → Microid Battle Suit Legs Nomad (#1)
+[01:12:21]   → Horizon Helmet White (#6)
+[01:12:22]   → J-5 Helmet (#1)
+[01:12:24]   → Deo Shirt Dark Green (#1)
+[01:12:25]   → Oracle Helmet Red (#1)
+[01:12:27]   → Citadel-SE Arms Maroon (#1)
+[01:12:28]   → Cliffback T-Shirt Twilight (#1)
+[01:12:29]   → Sinkhole Backpack (#1)
+[01:12:31]   → ORC-mkV Core Red (#1)
+[01:12:32]   → Morningstar Helmet Base (#1)
+[01:12:33]   → Microid Battle Suit Legs Lodestone (#1)
+[01:12:35]   → Ati Jacket Black (#1)
+[01:12:36]   → Inquisitor Core (#1)
+[01:12:37]   → Inquisitor Legs Base (#1)
+[01:12:39]   → Ridgewalker Boots Dark Blue (#1)
+[01:12:40]   → Kaswal Jacket Pine (#1)
+[01:12:41]   → Hillcrest Boots (#1)
+[01:12:43]   → Faction Jacket Green (#1)
+[01:12:44]   → Microid Battle Suit Core Nomad (#1)
+[01:12:45]   → WorkLife Pants Black (#1)
+[01:12:47]   → Horde Jacket (#1)
+[01:12:48]   → Inquisitor Legs Base (#2)
+[01:12:49]   → Horizon Helmet White (#7)
+[01:12:51]     [RETRY] OCR text found but no DB match → max attempts: 5
+[01:12:51]     [RETRY] 1/5: No DB match for '@item Name Inal vest 0l 0 IHol'
+[01:12:53]     [RETRY] 2/5: No DB match for '@item Name Inal vest o1 0 140l'
+[01:12:54]     [RETRY] 3/5: No DB match for '@item Name Ina vest ol 0 IHol'
+[01:12:55]     [RETRY] 4/5: No DB match for '@item Name Inal vest 01_o 1401'
+[01:12:57]     [FAILED] OCR: '@item Name Ina vest ol 0 IHol' - No DB match after 5 attempts
+[01:12:58]   → WK-8 Shoes (#1)
+[01:13:00]   → Frontier 05 Pants Harvest (#1)
+[01:13:00]   Items found
+[01:13:00]   Scrollbar detection (distance: 322px)...
+[01:13:00]   Scrollbar found: Y=610, Bottom=743, Height=267px
+[01:13:00]   Dragging from X=1795, Y=610, distance=322px
+[01:13:01]   Scrolled (block 2)
+[01:13:01] 
+=== SCANNING BLOCK 3 ===
+[01:13:01]   Block 3: 8 rows, 97px step, drift -0px
+[01:13:02]     [RETRY] 1/2: No text
+[01:13:04]     [RETRY] OCR text found but no DB match → max attempts: 5
+[01:13:04]     [RETRY] 2/5: No DB match for '@item Name Inal vest o1 0 1401'
+[01:13:05]     [RETRY] 3/5: No DB match for '@item Name Ina vest ol 0 IHol'
+[01:13:06]     [RETRY] 4/5: No DB match for '@item Name Ina vest ol 0 IHol'
+[01:13:08]     [FAILED] OCR: '@item Name Inal vest o1 0 1401' - No DB match after 5 attempts
+[01:13:10]   → Cliffback T-Shirt Green (#1)
+[01:13:11]   → Landlite Boots Tan (#1)
+[01:13:12]   → Falston Jumpsuit (#1)
+[01:13:14]   → Wanderer Boots Forest (#1)
+[01:13:15]   → Ardent Boots Aqua (#1)
+[01:13:16]   → Falston Jumpsuit (#2)
+[01:13:18]   → Horizon Helmet White (#8)
+[01:13:19]   → Aril Helmet Hazard (#1)
+[01:13:21]   → Aril Arms Hazard (#1)
+[01:13:22] 
+[ABORT] DELETE pressed at scan_rows_block:347
+[01:13:22] Mouse stopped
+[01:13:22] 
+[RESULTS] 72 items scanned (63 unique)
+[01:13:22] [RESULTS] Saved to detected_items.txt
+[01:13:22] [NOT DETECTED] 2 new unmatched items (30 total)
+[01:13:22] [NOT DETECTED] Saved to not_detected.md
+[01:13:22] 
 ✅ SCAN COMPLETE! See detected_items.txt
-[21:28:45] 
+[01:13:22] 
 ============================================================
-[21:28:46] 
+[01:13:23] 
 [INFO] Scan mode: 1x1 (Normal)
-[21:28:46] Press INSERT to start scan, or ESC to exit...
-[21:28:54] 
-[EXIT] ESC pressed - Exiting scanner...
+[01:13:23] Press INSERT to start scan, or ESC to exit...

@@ -1,19 +1,63 @@
-3, Adroit Gloves Indigo
-2, Adroit Gloves Olive
-1, Adroit Gloves Sage
-1, Arcus Gloves Teal
-1, Arcus Gloves Yellow
-5, Badami Gloves Deadwood
-1, Baru Gloves Viridian (Left Only)
-2, Cody Gloves
-2, Davin Work Gloves Red
-1, Davin Work Gloves Seagreen
-1, Debnam Gloves (Modified 9T)
-1, Debnam Gloves Olive
-2, Debnam Gloves Orange
-1, Fractus Gloves Maroon
-1, Grappler Gloves Veritas
-1, Ixonia Gloves Green
-1, Mercury Gloves (Modified 9T)
-1, Ventra Gloves Black
-1, Ventra Gloves Blue
+1, ADP-mk4 Arms (Modified)
+1, ADP-mk4 Core (Modified)
+1, ADP-mk4 Legs (Modified)
+1, Arden-CL Backpack Balefire
+1, Ardent Boots Aqua
+1, Argus Helmet Black/Aqua/Silver
+1, Aril Arms Hazard
+1, Aril Helmet
+1, Aril Helmet Hazard
+1, Ati Jacket Black
+1, Aztalan Galena Arms
+1, Balor HCH Helmet Olive
+1, Balor HCH Helmet Orange
+1, Brocius Waist Apron
+1, CBH-3 Helmet Olive
+1, Carrion Arms Maniac
+1, Carrion Helmet Stalker
+1, Citadel-SE Arms Maroon
+1, Cliffback T-Shirt Green
+1, Cliffback T-Shirt Twilight
+1, Deo Shirt Dark Green
+1, Edgewear Pants Tan
+1, Faction Jacket Green
+2, Falston Jumpsuit
+1, Frontier 05 Pants Harvest
+1, G-2 Helmet Aqua
+1, Hillcrest Boots
+1, Horde Jacket
+8, Horizon Helmet White
+1, Inmate Workpack
+1, Inquisitor Arms Outcrop
+1, Inquisitor Core
+2, Inquisitor Legs Base
+1, J-5 Helmet
+1, Kaswal Jacket Pine
+1, Keldur Hat and Oak Goggles
+1, Landlite Boots Tan
+1, Lynx Core Violet
+1, MacFlex Arms Blue
+1, MacFlex Legs Green
+1, Microid Battle Suit Core Nomad
+1, Microid Battle Suit Legs Lodestone
+1, Microid Battle Suit Legs Nomad
+1, Morningstar Helmet Base
+1, Morningstar Helmet Grey
+1, Morozov-SH Arms Smokescreen
+1, Nyman Jacket Yellow
+1, ORC-mkV Core Cry-Astro Edition
+1, ORC-mkV Core Red
+1, ORC-mkX Arms Twilight
+1, ORC-mkX Helmet Nightfire
+1, Oracle Helmet Red
+1, PAB-1 Core Imperial
+1, Ridgewalker Boots Dark Blue
+1, Sinkhole Backpack
+1, Stoneskin Helmet Desert
+1, The Butcher Helmet
+1, Venture Arms Dark Green
+1, Venture Core Olive
+1, WK-8 Shoes
+1, Wanderer Boots Forest
+1, WorkLife Pants Black
+1, Wrecker Core
