@@ -28,11 +28,6 @@ function getItemIcon(item, size = 'medium') {
         'arms': 'Arms',
         'legs': 'Legs',
         'backpack': 'Backpack',
-        'weapon': 'Weapon',
-        'ship weapon': 'Weapon',
-        'ship': 'Ship',
-        'ground vehicle': 'GroundVehicle',
-        'armor': 'Armor',
         'undersuit': 'Undersuit',
         'jacket': 'Jacket',
         'pants': 'Pants',
@@ -40,11 +35,14 @@ function getItemIcon(item, size = 'medium') {
         'shoes': 'Shoes',
         'hat': 'Hat',
         'hands': 'Hands',
-        'tool': 'Tool'
+        'eyes': 'Eyes',
+        'jumpsuit': 'Jumpsuit',
+        'unknown': 'Helmet'  // Default fallback to existing placeholder
     };
 
-    const itemType = item.item_type || item.type || 'Unknown';
-    const mappedType = partTypeMapping[itemType.toLowerCase()] || 'Placeholder';
+    const itemType = item.item_type || item.type || 'unknown';
+    const itemTypeLower = (itemType || 'unknown').toString().toLowerCase();
+    const mappedType = partTypeMapping[itemTypeLower] || 'Helmet';  // Use Helmet as default fallback
 
     return `/images/Placeholder/${mappedType}.png`;
 }
@@ -2455,3 +2453,127 @@ function openNotDetectedFile() {
     // Alternative: Try to open via backend API
     // This would require a new backend method to open files
 }
+
+// Save window size and position when changed (for desktop mode)
+let saveWindowTimeout = null;
+function saveWindowGeometry() {
+    if (saveWindowTimeout) {
+        clearTimeout(saveWindowTimeout);
+    }
+
+    // Debounce saving to avoid too many writes during resize
+    saveWindowTimeout = setTimeout(() => {
+        try {
+            // Check if window is maximized
+            // We detect this by comparing available screen size with window size
+            const isMaximized = (
+                window.outerWidth >= (screen.availWidth - 10) &&
+                window.outerHeight >= (screen.availHeight - 10)
+            );
+
+            if (isMaximized) {
+                localStorage.setItem('windowMaximized', 'true');
+                console.log(`💾 Window state saved: MAXIMIZED`);
+            } else {
+                localStorage.setItem('windowMaximized', 'false');
+                localStorage.setItem('windowWidth', window.outerWidth);
+                localStorage.setItem('windowHeight', window.outerHeight);
+                localStorage.setItem('windowX', window.screenX);
+                localStorage.setItem('windowY', window.screenY);
+                console.log(`💾 Window geometry saved: ${window.outerWidth}x${window.outerHeight} at (${window.screenX}, ${window.screenY})`);
+            }
+        } catch (e) {
+            console.warn('Could not save window geometry:', e);
+        }
+    }, 500); // Save 500ms after last resize/move
+}
+
+// Listen for window resize and move events
+window.addEventListener('resize', saveWindowGeometry);
+window.addEventListener('beforeunload', saveWindowGeometry); // Save on close
+
+// Note: There's no reliable cross-browser event for window move
+// So we'll save position on close only
+
+// Footer Button Handlers
+document.addEventListener('DOMContentLoaded', function() {
+    // Clear Cache Button
+    const clearCacheBtn = document.getElementById('clear-cache-btn');
+    if (clearCacheBtn) {
+        clearCacheBtn.addEventListener('click', async function() {
+            if (confirm(i18n.t('confirmClearCache') || 'Clear website cache and reload? This will remove all cached data.')) {
+                try {
+                    // Clear localStorage
+                    const language = localStorage.getItem('language'); // Save language
+                    const windowSettings = {
+                        width: localStorage.getItem('windowWidth'),
+                        height: localStorage.getItem('windowHeight'),
+                        x: localStorage.getItem('windowX'),
+                        y: localStorage.getItem('windowY'),
+                        maximized: localStorage.getItem('windowMaximized')
+                    };
+
+                    localStorage.clear();
+
+                    // Restore critical settings
+                    if (language) localStorage.setItem('language', language);
+                    if (windowSettings.width) localStorage.setItem('windowWidth', windowSettings.width);
+                    if (windowSettings.height) localStorage.setItem('windowHeight', windowSettings.height);
+                    if (windowSettings.x) localStorage.setItem('windowX', windowSettings.x);
+                    if (windowSettings.y) localStorage.setItem('windowY', windowSettings.y);
+                    if (windowSettings.maximized) localStorage.setItem('windowMaximized', windowSettings.maximized);
+
+                    // Clear service worker caches if available
+                    if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        await Promise.all(cacheNames.map(name => caches.delete(name)));
+                    }
+
+                    console.log('✅ Cache cleared');
+                    alert(i18n.t('cacheCleared') || 'Cache cleared! Page will reload.');
+                    location.reload(true);
+                } catch (e) {
+                    console.error('Error clearing cache:', e);
+                    alert('Error clearing cache: ' + e.message);
+                }
+            }
+        });
+    }
+
+    // Debug Button - Open DevTools
+    const debugBtn = document.getElementById('debug-btn');
+    if (debugBtn) {
+        debugBtn.addEventListener('click', async function() {
+            try {
+                await api.open_devtools();
+                console.log('✅ DevTools triggered');
+            } catch (e) {
+                console.error('Error opening DevTools:', e);
+                // Fallback: just log message
+                console.log('💡 Press F12 to open DevTools manually');
+            }
+        });
+    }
+
+    // Clear Inventory Button - Set all counts to 0
+    const clearInventoryBtn = document.getElementById('clear-inventory-btn');
+    if (clearInventoryBtn) {
+        clearInventoryBtn.addEventListener('click', async function() {
+            if (confirm(i18n.t('confirmClearInventory') || 'Set all item counts to 0? This will clear your entire inventory but keep items in the database.')) {
+                try {
+                    const result = await api.clear_inventory();
+                    if (result && result.success) {
+                        alert(i18n.t('inventoryCleared') || 'Inventory cleared! All item counts set to 0.');
+                        loadInventory();
+                        loadStats();
+                    } else {
+                        alert('Error clearing inventory: ' + (result?.error || 'Unknown error'));
+                    }
+                } catch (e) {
+                    console.error('Error clearing inventory:', e);
+                    alert('Error clearing inventory: ' + e.message);
+                }
+            }
+        });
+    }
+});

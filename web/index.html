@@ -155,74 +155,74 @@
                 <section class="import-section">
                     <!-- Before Scan State -->
                     <div id="import-before-scan" class="import-state">
-                        <h2>📥 Import from Star Citizen</h2>
+                        <h2 data-i18n="importTitle">📥 Import from Star Citizen</h2>
 
                         <!-- Admin Rights Warning -->
                         <div class="admin-warning">
-                            <h3>⚠️ Administrator-Rechte erforderlich</h3>
-                            <p>Der InvDetect Scanner benötigt Admin-Rechte für Tastatur-Hooks und Fenster-Switching.</p>
-                            <p><strong>Bitte verwende:</strong> <code>start-browser-admin.bat</code> oder <code>start-desktop-admin.bat</code></p>
-                            <p>Ohne Admin-Rechte wird der Scanner nicht funktionieren.</p>
+                            <h3 data-i18n="importAdminRequired">⚠️ Administrator-Rechte erforderlich</h3>
+                            <p data-i18n="importAdminWarning1">Der InvDetect Scanner benötigt Admin-Rechte für Tastatur-Hooks und Fenster-Switching.</p>
+                            <p data-i18n="importAdminWarning2" data-i18n-html="true"><strong>Bitte verwende:</strong> <code>start-browser-admin.bat</code> oder <code>start-desktop-admin.bat</code></p>
+                            <p data-i18n="importAdminWarning3">Ohne Admin-Rechte wird der Scanner nicht funktionieren.</p>
                         </div>
 
                         <!-- Scan Mode Selection -->
                         <div class="scan-mode-selection">
-                            <h3>🎯 Scan Mode wählen:</h3>
+                            <h3 data-i18n="importSelectScanMode">🎯 Scan Mode wählen:</h3>
                             <div class="mode-buttons">
                                 <button class="mode-btn active" data-mode="1">
                                     <div class="mode-icon">📦</div>
-                                    <div class="mode-title">1x1 Items</div>
-                                    <div class="mode-description">Normal (Waffen, Rüstungen, etc.)</div>
+                                    <div class="mode-title" data-i18n="importMode1Title">1x1 Items</div>
+                                    <div class="mode-description" data-i18n="importMode1Desc">Normal (Waffen, Rüstungen, etc.)</div>
                                 </button>
                                 <button class="mode-btn" data-mode="2">
                                     <div class="mode-icon">👔</div>
-                                    <div class="mode-title">1x2 Items</div>
-                                    <div class="mode-description">Undersuits</div>
+                                    <div class="mode-title" data-i18n="importMode2Title">1x2 Items</div>
+                                    <div class="mode-description" data-i18n="importMode2Desc">Undersuits</div>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Instructions -->
                         <div class="scan-instructions">
-                            <h3>📋 Anleitung:</h3>
+                            <h3 data-i18n="importInstructions">📋 Anleitung:</h3>
                             <ol>
-                                <li>Wähle den passenden Scan-Modus (1x1 oder 1x2)</li>
-                                <li>Klicke auf "Scan Now"</li>
-                                <li>Ein CMD-Fenster öffnet sich mit "Press INSERT to start scan..."</li>
-                                <li>Wechsle zu Star Citizen und öffne dein Universal Inventory</li>
-                                <li>Drücke INSERT zum Starten</li>
-                                <li>Der Scanner arbeitet automatisch</li>
-                                <li><strong>Abbruch:</strong> Drücke DELETE oder bewege Maus in Bildschirmecke</li>
-                                <li>Nach dem Scan werden die Ergebnisse hier angezeigt</li>
+                                <li data-i18n="importStep1">Wähle den passenden Scan-Modus (1x1 oder 1x2)</li>
+                                <li data-i18n="importStep2">Klicke auf "Scan Now"</li>
+                                <li data-i18n="importStep3">Ein CMD-Fenster öffnet sich mit "Press INSERT to start scan..."</li>
+                                <li data-i18n="importStep4">Wechsle zu Star Citizen und öffne dein Universal Inventory</li>
+                                <li data-i18n="importStep5">Drücke INSERT zum Starten</li>
+                                <li data-i18n="importStep6">Der Scanner arbeitet automatisch</li>
+                                <li data-i18n="importStep7" data-i18n-html="true"><strong>Abbruch:</strong> Drücke DELETE oder bewege Maus in Bildschirmecke</li>
+                                <li data-i18n="importStep8">Nach dem Scan werden die Ergebnisse hier angezeigt</li>
                             </ol>
                             <div class="scan-tip">
-                                💡 <strong>Tipp:</strong> Stelle sicher, dass Star Citizen im Vollbild-Modus läuft (1920x1080) für beste Ergebnisse.
+                                <span data-i18n="importTip" data-i18n-html="true">💡 <strong>Tipp:</strong> Stelle sicher, dass Star Citizen im Vollbild-Modus läuft (1920x1080) für beste Ergebnisse.</span>
                             </div>
                         </div>
 
                         <!-- Start Scan Button -->
-                        <button id="start-scan-btn" class="scan-btn">
+                        <button id="start-scan-btn" class="scan-btn" data-i18n="importScanNow">
                             🚀 Scan Now
                         </button>
                     </div>
 
                     <!-- During Scan State -->
                     <div id="import-during-scan" class="import-state hidden">
-                        <h2>⏳ Scan läuft...</h2>
-                        <p>Der Scanner ist aktiv. Bitte folge den Anweisungen im CMD-Fenster.</p>
-                        <p><strong>Abbruch:</strong> DELETE-Taste oder Maus in Bildschirmecke</p>
-                        <button id="check-results-btn" class="scan-btn">
+                        <h2 data-i18n="importScanning">⏳ Scan läuft...</h2>
+                        <p data-i18n="importScannerActive">Der Scanner ist aktiv. Bitte folge den Anweisungen im CMD-Fenster.</p>
+                        <p data-i18n="importCancelInfo" data-i18n-html="true"><strong>Abbruch:</strong> DELETE-Taste oder Maus in Bildschirmecke</p>
+                        <button id="check-results-btn" class="scan-btn" data-i18n="importCheckResults">
                             🔍 Ergebnisse prüfen
                         </button>
                     </div>
 
                     <!-- After Scan State - Results -->
                     <div id="import-after-scan" class="import-state hidden">
-                        <h2>✅ Scan abgeschlossen</h2>
+                        <h2 data-i18n="importScanComplete">✅ Scan abgeschlossen</h2>
 
                         <!-- Category Filter for Results -->
                         <div class="import-controls">
-                            <h3>🏷️ Kategorie Filter:</h3>
+                            <h3 data-i18n="importCategoryFilter">🏷️ Kategorie Filter:</h3>
                             <div id="import-category-buttons" class="category-grid">
                                 <!-- Dynamic category buttons -->
                             </div>
@@ -230,13 +230,13 @@
 
                         <!-- Undo/Redo Controls -->
                         <div class="import-undo-controls">
-                            <button id="undo-btn" class="undo-btn" disabled>↶ Undo</button>
-                            <button id="redo-btn" class="redo-btn" disabled>↷ Redo</button>
+                            <button id="undo-btn" class="undo-btn" disabled data-i18n="importUndo">↶ Undo</button>
+                            <button id="redo-btn" class="redo-btn" disabled data-i18n="importRedo">↷ Redo</button>
                         </div>
 
                         <!-- Found Items -->
                         <div class="import-results-section">
-                            <h3>✅ Gefundene Items (<span id="found-count">0</span>)</h3>
+                            <h3 data-i18n="importFoundItems">✅ Gefundene Items (<span id="found-count">0</span>)</h3>
                             <div id="import-found-grid" class="import-grid">
                                 <!-- Dynamic grid items -->
                             </div>
@@ -244,21 +244,21 @@
 
                         <!-- Not Found Items -->
                         <div class="import-results-section">
-                            <h3>❓ Nicht erkannte Items (<span id="notfound-count">0</span>)</h3>
+                            <h3 data-i18n="importNotFoundItems">❓ Nicht erkannte Items (<span id="notfound-count">0</span>)</h3>
                             <div id="import-notfound-list" class="import-notfound-list">
                                 <!-- Dynamic list items -->
                             </div>
-                            <button id="open-notdetected-btn" class="secondary-btn">
+                            <button id="open-notdetected-btn" class="secondary-btn" data-i18n="importOpenNotDetected">
                                 📄 not_detected.md öffnen
                             </button>
                         </div>
 
                         <!-- Import Actions -->
                         <div class="import-actions">
-                            <button id="import-items-btn" class="scan-btn">
+                            <button id="import-items-btn" class="scan-btn" data-i18n="importImportItems">
                                 ✅ Items importieren
                             </button>
-                            <button id="new-scan-btn" class="secondary-btn">
+                            <button id="new-scan-btn" class="secondary-btn" data-i18n="importNewScan">
                                 🔄 Neuer Scan
                             </button>
                         </div>
@@ -330,6 +330,21 @@
     <!-- Fuse.js for smart search -->
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     
+    <!-- Footer with utility buttons -->
+    <footer class="app-footer">
+        <div class="footer-buttons">
+            <button id="clear-cache-btn" class="footer-btn" data-i18n="footerClearCache" title="Clear website cache and reload">
+                🗑️ Clear Cache
+            </button>
+            <button id="debug-btn" class="footer-btn" data-i18n="footerDebug" title="Open DevTools">
+                🐛 Debug
+            </button>
+            <button id="clear-inventory-btn" class="footer-btn" data-i18n="footerClearInventory" title="Set all item counts to 0">
+                📦 Clear Inventory
+            </button>
+        </div>
+    </footer>
+
     <!-- App Scripts -->
     <script src="api-adapter.js"></script>
     <script src="app.js"></script>

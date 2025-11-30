@@ -59,21 +59,68 @@ class DesktopServer:
         time.sleep(0.5)
     
     def on_loaded(self):
-        """Called when window finishes loading - hide DevTools if they auto-opened"""
-        # DevTools auto-open with debug=True
-        # Close them by simulating F12 keypress
-        def close_devtools():
+        """Called when window finishes loading - restore window size and hide DevTools"""
+        def restore_window_size_and_close_devtools():
             time.sleep(0.5)  # Wait for window to be ready
+
+            # Restore window size from localStorage
             try:
-                import pyautogui
-                # Focus the window first, then press F12 to close DevTools
-                pyautogui.press('f12')
-                print("📌 DevTools geschlossen - drücke F12 oder 🐛 Debug um sie zu öffnen")
+                js_code = """
+                (function() {
+                    const savedWidth = localStorage.getItem('windowWidth');
+                    const savedHeight = localStorage.getItem('windowHeight');
+                    const savedX = localStorage.getItem('windowX');
+                    const savedY = localStorage.getItem('windowY');
+                    const isMaximized = localStorage.getItem('windowMaximized') === 'true';
+
+                    return {
+                        width: savedWidth ? parseInt(savedWidth) : null,
+                        height: savedHeight ? parseInt(savedHeight) : null,
+                        x: savedX ? parseInt(savedX) : null,
+                        y: savedY ? parseInt(savedY) : null,
+                        maximized: isMaximized
+                    };
+                })();
+                """
+                result = self.window.evaluate_js(js_code)
+
+                if result and result.get('maximized'):
+                    # Window was maximized - maximize it
+                    # pywebview doesn't have a direct maximize method, so we set it to screen size
+                    try:
+                        # Execute JavaScript to get screen dimensions
+                        screen_info = self.window.evaluate_js("""
+                        (function() {
+                            return {
+                                width: screen.availWidth,
+                                height: screen.availHeight
+                            };
+                        })();
+                        """)
+                        if screen_info:
+                            self.window.resize(screen_info['width'], screen_info['height'])
+                            self.window.move(0, 0)
+                            print(f"✅ Window maximized to {screen_info['width']}x{screen_info['height']}")
+                    except Exception as e:
+                        print(f"Could not maximize window: {e}")
+                elif result and result.get('width') and result.get('height'):
+                    # Resize window to saved size
+                    self.window.resize(result['width'], result['height'])
+                    print(f"✅ Window size restored: {result['width']}x{result['height']}")
+
+                    # Move window if position was saved
+                    if result.get('x') is not None and result.get('y') is not None:
+                        self.window.move(result['x'], result['y'])
+                        print(f"✅ Window position restored: ({result['x']}, {result['y']})")
             except Exception as e:
-                print(f"Could not auto-close DevTools: {e}")
+                print(f"Could not restore window size: {e}")
+
+            # DevTools are disabled by default (debug=False)
+            # User can open them with F12 or Debug button
+            print("📌 DevTools verfügbar - drücke F12 oder klicke 🐛 Debug")
 
         # Run in thread to not block the UI
-        threading.Thread(target=close_devtools, daemon=True).start()
+        threading.Thread(target=restore_window_size_and_close_devtools, daemon=True).start()
 
     def start_desktop_window(self):
         """Start pywebview window"""
@@ -103,9 +150,9 @@ class DesktopServer:
         print("💡 Drücke F12 oder klicke 🐛 Debug um DevTools zu öffnen")
         print("=" * 60)
 
-        # Start webview WITH debug mode (enables DevTools)
-        # They will auto-open but we'll close them in the loaded event
-        webview.start(debug=True)
+        # Start webview WITHOUT auto-opening DevTools
+        # Users can open DevTools with F12 or Debug button
+        webview.start(debug=True)  # Keep debug=True to enable DevTools, but don't auto-open
         
     def start(self):
         """Start the complete desktop application"""

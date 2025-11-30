@@ -107,28 +107,39 @@ class TranslationSystem {
         document.querySelectorAll('[data-i18n]').forEach(element => {
             const key = element.getAttribute('data-i18n');
             const translation = this.t(key);
-            
+
+            // Check if element has data-i18n-html (allows HTML content)
+            if (element.hasAttribute('data-i18n-html')) {
+                element.innerHTML = translation;
+            }
             // Check if element has data-i18n-attr (translate attribute instead of text)
-            const attr = element.getAttribute('data-i18n-attr');
-            if (attr) {
+            else if (element.hasAttribute('data-i18n-attr')) {
+                const attr = element.getAttribute('data-i18n-attr');
                 element.setAttribute(attr, translation);
-            } else {
-                // Update text content
+            }
+            // Default: update text content
+            else {
                 element.textContent = translation;
             }
         });
-        
+
+        // Update title attributes (tooltips)
+        document.querySelectorAll('[data-i18n-title]').forEach(element => {
+            const key = element.getAttribute('data-i18n-title');
+            element.title = this.t(key);
+        });
+
         // Update placeholders
         document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
             const key = element.getAttribute('data-i18n-placeholder');
             element.placeholder = this.t(key);
         });
-        
+
         // Trigger custom event for dynamic content
         document.dispatchEvent(new CustomEvent('languageChanged', {
             detail: { language: this.currentLanguage }
         }));
-        
+
         console.log('✅ UI updated with translations');
     }
 }

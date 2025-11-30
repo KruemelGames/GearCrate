@@ -83,5 +83,48 @@ const en = {
     
     // Language
     language: "Language:",
-    languageName: "English"
+    languageName: "English",
+
+    // Footer Buttons
+    footerClearCache: "🗑️ Clear Cache",
+    footerDebug: "🐛 Debug",
+    footerClearInventory: "📦 Clear Inventory",
+    confirmClearCache: "Clear website cache and reload? This will remove all cached data.",
+    cacheCleared: "Cache cleared! Page will reload.",
+
+    // Import from SC Section
+    importTitle: "📥 Import from Star Citizen",
+    importAdminRequired: "⚠️ Administrator Rights Required",
+    importAdminWarning1: "The InvDetect Scanner requires admin rights for keyboard hooks and window switching.",
+    importAdminWarning2: "<strong>Please use:</strong> <code>start-browser-admin.bat</code> or <code>start-desktop-admin.bat</code>",
+    importAdminWarning3: "Without admin rights, the scanner will not work.",
+    importSelectScanMode: "🎯 Select Scan Mode:",
+    importMode1Title: "1x1 Items",
+    importMode1Desc: "Normal (Weapons, Armor, etc.)",
+    importMode2Title: "1x2 Items",
+    importMode2Desc: "Undersuits",
+    importInstructions: "📋 Instructions:",
+    importStep1: "Select the appropriate scan mode (1x1 or 1x2)",
+    importStep2: "Click \"Scan Now\"",
+    importStep3: "A CMD window will open with \"Press INSERT to start scan...\"",
+    importStep4: "Switch to Star Citizen and open your Universal Inventory",
+    importStep5: "Press INSERT to start",
+    importStep6: "The scanner will work automatically",
+    importStep7: "<strong>Cancel:</strong> Press DELETE or move mouse to screen corner",
+    importStep8: "After the scan, results will be displayed here",
+    importTip: "💡 <strong>Tip:</strong> Make sure Star Citizen is running in fullscreen mode (1920x1080) for best results.",
+    importScanNow: "🚀 Scan Now",
+    importScanning: "⏳ Scanning...",
+    importScannerActive: "Scanner is active. Please follow the instructions in the CMD window.",
+    importCancelInfo: "<strong>Cancel:</strong> DELETE key or move mouse to screen corner",
+    importCheckResults: "🔍 Check Results",
+    importScanComplete: "✅ Scan Complete",
+    importCategoryFilter: "🏷️ Category Filter:",
+    importUndo: "↶ Undo",
+    importRedo: "↷ Redo",
+    importFoundItems: "✅ Found Items",
+    importNotFoundItems: "❓ Unrecognized Items",
+    importOpenNotDetected: "📄 Open not_detected.md",
+    importImportItems: "✅ Import Items",
+    importNewScan: "🔄 New Scan"
 };

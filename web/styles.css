@@ -1631,3 +1631,55 @@ textarea {
 .import-grid::-webkit-scrollbar-thumb:hover {
     background: #00ffff;
 }
+
+/* Footer Styles */
+.app-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    border-top: 2px solid #00d9ff;
+    padding: 10px 20px;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.footer-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.footer-btn {
+    background: rgba(0, 217, 255, 0.15);
+    border: 1px solid #00d9ff;
+    color: #00d9ff;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-btn:hover {
+    background: rgba(0, 217, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+}
+
+.footer-btn:active {
+    transform: translateY(0);
+}
+
+/* Add padding to content so footer doesn't overlap */
+.container {
+    padding-bottom: 70px;
+}

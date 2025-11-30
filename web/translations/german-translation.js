@@ -83,5 +83,48 @@ const de = {
     
     // Language
     language: "Sprache:",
-    languageName: "Deutsch"
+    languageName: "Deutsch",
+
+    // Footer Buttons
+    footerClearCache: "🗑️ Cache leeren",
+    footerDebug: "🐛 Debug",
+    footerClearInventory: "📦 Inventar leeren",
+    confirmClearCache: "Website-Cache leeren und neu laden? Dies entfernt alle zwischengespeicherten Daten.",
+    cacheCleared: "Cache geleert! Seite wird neu geladen.",
+
+    // Import from SC Section
+    importTitle: "📥 Import from Star Citizen",
+    importAdminRequired: "⚠️ Administrator-Rechte erforderlich",
+    importAdminWarning1: "Der InvDetect Scanner benötigt Admin-Rechte für Tastatur-Hooks und Fenster-Switching.",
+    importAdminWarning2: "<strong>Bitte verwende:</strong> <code>start-browser-admin.bat</code> oder <code>start-desktop-admin.bat</code>",
+    importAdminWarning3: "Ohne Admin-Rechte wird der Scanner nicht funktionieren.",
+    importSelectScanMode: "🎯 Scan Mode wählen:",
+    importMode1Title: "1x1 Items",
+    importMode1Desc: "Normal (Waffen, Rüstungen, etc.)",
+    importMode2Title: "1x2 Items",
+    importMode2Desc: "Undersuits",
+    importInstructions: "📋 Anleitung:",
+    importStep1: "Wähle den passenden Scan-Modus (1x1 oder 1x2)",
+    importStep2: "Klicke auf \"Scan Now\"",
+    importStep3: "Ein CMD-Fenster öffnet sich mit \"Press INSERT to start scan...\"",
+    importStep4: "Wechsle zu Star Citizen und öffne dein Universal Inventory",
+    importStep5: "Drücke INSERT zum Starten",
+    importStep6: "Der Scanner arbeitet automatisch",
+    importStep7: "<strong>Abbruch:</strong> Drücke DELETE oder bewege Maus in Bildschirmecke",
+    importStep8: "Nach dem Scan werden die Ergebnisse hier angezeigt",
+    importTip: "💡 <strong>Tipp:</strong> Stelle sicher, dass Star Citizen im Vollbild-Modus läuft (1920x1080) für beste Ergebnisse.",
+    importScanNow: "🚀 Scan Now",
+    importScanning: "⏳ Scan läuft...",
+    importScannerActive: "Der Scanner ist aktiv. Bitte folge den Anweisungen im CMD-Fenster.",
+    importCancelInfo: "<strong>Abbruch:</strong> DELETE-Taste oder Maus in Bildschirmecke",
+    importCheckResults: "🔍 Ergebnisse prüfen",
+    importScanComplete: "✅ Scan abgeschlossen",
+    importCategoryFilter: "🏷️ Kategorie Filter:",
+    importUndo: "↶ Rückgängig",
+    importRedo: "↷ Wiederholen",
+    importFoundItems: "✅ Gefundene Items",
+    importNotFoundItems: "❓ Nicht erkannte Items",
+    importOpenNotDetected: "📄 not_detected.md öffnen",
+    importImportItems: "✅ Items importieren",
+    importNewScan: "🔄 Neuer Scan"
 };

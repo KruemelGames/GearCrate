@@ -30,20 +30,32 @@ function updateDynamicContent() {
     const sortOrderBtn = document.getElementById('sort-order-btn');
     if (sortOrderBtn) {
         if (currentSortOrder === 'asc') {
-            sortOrderBtn.textContent = '⬇️ ' + t('sortAscending').replace('⬇️ ', '');
+            const ascText = i18n.t('sortAscending');
+            if (typeof ascText === 'string') {
+                sortOrderBtn.textContent = '⬇️ ' + ascText.replace('⬇️ ', '');
+            }
         } else {
-            sortOrderBtn.textContent = '⬆️ ' + t('sortDescending').replace('⬆️ ', '');
+            const descText = i18n.t('sortDescending');
+            if (typeof descText === 'string') {
+                sortOrderBtn.textContent = '⬆️ ' + descText.replace('⬆️ ', '');
+            }
         }
     }
-    
+
     // Reload categories with new language
-    loadCategories();
-    
+    if (typeof loadCategories === 'function') {
+        loadCategories();
+    }
+
     // Reload inventory to update "no items" message
-    loadInventory();
-    
+    if (typeof loadInventory === 'function') {
+        loadInventory();
+    }
+
     // Reload stats title
-    loadStats();
+    if (typeof loadStats === 'function') {
+        loadStats();
+    }
 }
 
 // Override alert messages to use translations

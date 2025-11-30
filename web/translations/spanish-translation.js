@@ -83,5 +83,48 @@ const es = {
     
     // Language
     language: "Idioma:",
-    languageName: "Español"
+    languageName: "Español",
+
+    // Footer Buttons
+    footerClearCache: "🗑️ Limpiar caché",
+    footerDebug: "🐛 Depurar",
+    footerClearInventory: "📦 Limpiar inventario",
+    confirmClearCache: "¿Limpiar caché del sitio y recargar? Esto eliminará todos los datos almacenados en caché.",
+    cacheCleared: "¡Caché limpiado! La página se recargará.",
+
+    // Import from SC Section
+    importTitle: "📥 Importar de Star Citizen",
+    importAdminRequired: "⚠️ Derechos de administrador requeridos",
+    importAdminWarning1: "El escáner InvDetect requiere derechos de administrador para hooks de teclado y cambio de ventana.",
+    importAdminWarning2: "<strong>Por favor use:</strong> <code>start-browser-admin.bat</code> o <code>start-desktop-admin.bat</code>",
+    importAdminWarning3: "Sin derechos de administrador, el escáner no funcionará.",
+    importSelectScanMode: "🎯 Seleccionar modo de escaneo:",
+    importMode1Title: "Objetos 1x1",
+    importMode1Desc: "Normal (Armas, Armaduras, etc.)",
+    importMode2Title: "Objetos 1x2",
+    importMode2Desc: "Ropa interior",
+    importInstructions: "📋 Instrucciones:",
+    importStep1: "Seleccione el modo de escaneo apropiado (1x1 o 1x2)",
+    importStep2: "Haga clic en \"Escanear ahora\"",
+    importStep3: "Se abrirá una ventana CMD con \"Press INSERT to start scan...\"",
+    importStep4: "Cambie a Star Citizen y abra su inventario universal",
+    importStep5: "Presione INSERT para comenzar",
+    importStep6: "El escáner funcionará automáticamente",
+    importStep7: "<strong>Cancelar:</strong> Presione DELETE o mueva el mouse a la esquina de la pantalla",
+    importStep8: "Después del escaneo, los resultados se mostrarán aquí",
+    importTip: "💡 <strong>Consejo:</strong> Asegúrese de que Star Citizen se ejecute en modo de pantalla completa (1920x1080) para obtener mejores resultados.",
+    importScanNow: "🚀 Escanear ahora",
+    importScanning: "⏳ Escaneando...",
+    importScannerActive: "El escáner está activo. Siga las instrucciones en la ventana CMD.",
+    importCancelInfo: "<strong>Cancelar:</strong> Tecla DELETE o mueva el mouse a la esquina de la pantalla",
+    importCheckResults: "🔍 Verificar resultados",
+    importScanComplete: "✅ Escaneo completo",
+    importCategoryFilter: "🏷️ Filtro de categoría:",
+    importUndo: "↶ Deshacer",
+    importRedo: "↷ Rehacer",
+    importFoundItems: "✅ Objetos encontrados",
+    importNotFoundItems: "❓ Objetos no reconocidos",
+    importOpenNotDetected: "📄 Abrir not_detected.md",
+    importImportItems: "✅ Importar objetos",
+    importNewScan: "🔄 Nuevo escaneo"
 };
