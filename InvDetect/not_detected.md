@@ -34,7 +34,7 @@
 @item Name dmc_gloves_ 01 0il 02 - Page 1, Row 7, Col 2
 @item Name_Ina vest 1 01 0 - Page 1, Row 16, Col 2
 Ambrus Suit - Page 1, Row 20, Col 1; Page 1, Row 20, Col 3
-Argus Helmet Black/ White/ Violet - Page 8, Row 13, Col 4
+Argus Helmet Black/ White/ Violet - Page 2, Row 23, Col 2; Page 8, Row 13, Col 4
 Aril Legs Modified) - Page 4, Row 21, Col 1; Page 4, Row 69, Col 1
 Chamar Pants - Page 5, Row 21, Col 3; Page 5, Row 85, Col 3
 Morozov-SHcore - Page 1, Row 19, Col 0; Page 7, Row 7, Col 4

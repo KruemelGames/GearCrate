@@ -115,8 +115,16 @@ class DesktopServer:
             except Exception as e:
                 print(f"Could not restore window size: {e}")
 
-            # DevTools are disabled by default (debug=False)
-            # User can open them with F12 or Debug button
+            # Close DevTools if they opened automatically
+            # This allows F12 and Debug button to work later
+            try:
+                import pyautogui
+                time.sleep(0.3)  # Wait a bit more for DevTools to open
+                pyautogui.press('f12')  # Close DevTools
+                print("✅ DevTools geschlossen (können mit F12 oder 🐛 Debug geöffnet werden)")
+            except Exception as e:
+                print(f"⚠️ Could not close DevTools automatically: {e}")
+
             print("📌 DevTools verfügbar - drücke F12 oder klicke 🐛 Debug")
 
         # Run in thread to not block the UI
@@ -150,9 +158,10 @@ class DesktopServer:
         print("💡 Drücke F12 oder klicke 🐛 Debug um DevTools zu öffnen")
         print("=" * 60)
 
-        # Start webview WITHOUT auto-opening DevTools
-        # Users can open DevTools with F12 or Debug button
-        webview.start(debug=True)  # Keep debug=True to enable DevTools, but don't auto-open
+        # Start webview WITH debug=True to enable DevTools
+        # DevTools will auto-open but we close them immediately in on_loaded()
+        # This allows F12 and Debug button to work
+        webview.start(debug=True)  # debug=True enables DevTools functionality
         
     def start(self):
         """Start the complete desktop application"""

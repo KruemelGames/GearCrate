@@ -102,17 +102,16 @@ def main():
     log_print("\n=== InvDetect - Star Citizen Universal Inventory Scanner ===")
     log_print("INSERT → Start Scan | DELETE → Stop | ESC → Exit\n")
 
+    # Get scan mode from command line argument (passed by GearCrate)
+    import sys
+    scan_mode = int(sys.argv[1]) if len(sys.argv) > 1 else 1  # Default to 1 (1x1) if not provided
+    mode_name = "1x2 (Undersuits)" if scan_mode == 2 else "1x1 (Normal)"
+
+    log_print(f"\n[INFO] Scan mode: {mode_name}")
+
     # Main loop - allows multiple scans
     while True:
-        # Read scan mode from config.py (reload each time)
-        import importlib
-        importlib.reload(config)
-
-        scan_mode = getattr(config, 'SCAN_MODE', 1)  # Default to 1x1 if not set
-        mode_name = "1x2 (Undersuits)" if scan_mode == 2 else "1x1 (Normal)"
-
-        log_print(f"\n[INFO] Scan mode: {mode_name}")
-        log_print("Press INSERT to start scan, or ESC to exit...")
+        log_print("\nPress INSERT to start scan, or ESC to exit...")
 
         # Wait for INSERT or ESC
         while True:

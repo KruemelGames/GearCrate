@@ -28,6 +28,7 @@ class API:
         """Initialize API with database, scraper, and cache"""
         self.db = Database()
         self.operations = ItemOperations(self.db)
+        self.config_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'user_config.json')
         self.scraper = CStoneScraper()
         self.cache = ImageCache()
         self.gear_sets = GearSetsManager()
@@ -46,14 +47,31 @@ class API:
             return {'success': False, 'error': 'No webview window available'}
 
         try:
-            # Trigger F12 keypress to open DevTools
-            import pyautogui
-            pyautogui.press('f12')
-            print("✅ DevTools opened (F12 pressed)")
+            # Use pywebview's evaluate_js to trigger DevTools via JavaScript
+            # This executes JavaScript in the context of the webview window
+            API._webview_window.evaluate_js('''
+                // Try to open DevTools using Chrome DevTools Protocol
+                if (window.chrome && window.chrome.webview) {
+                    window.chrome.webview.hostObjects.sync.open_devtools();
+                }
+            ''')
+            print("✅ DevTools opened via JS")
             return {'success': True}
         except Exception as e:
-            print(f"⚠️ Could not open DevTools: {e}")
-            return {'success': False, 'error': str(e)}
+            # Fallback: Try F12 keypress
+            try:
+                import pyautogui
+                import time
+                # Focus the window first
+                API._webview_window.on_top = True
+                time.sleep(0.1)
+                pyautogui.press('f12')
+                API._webview_window.on_top = False
+                print("✅ DevTools opened (F12 pressed)")
+                return {'success': True}
+            except Exception as e2:
+                print(f"⚠️ Could not open DevTools: {e}, {e2}")
+                return {'success': False, 'error': str(e)}
 
     def _path_to_url(self, path):
         """
@@ -469,3 +487,260 @@ class API:
             import traceback
             traceback.print_exc()
             raise e
+
+    # =========================================================
+    # SCANNER FUNKTIONEN (InvDetect Integration)
+    # =========================================================
+
+    def set_scan_mode(self, mode):
+        """
+        Sets the scan mode for InvDetect scanner
+        mode: '1x1' or '1x2'
+        """
+        try:
+            # Convert mode to integer for main.py
+            if mode == '1x1':
+                self.current_scan_mode = 1
+            elif mode == '1x2':
+                self.current_scan_mode = 2
+            else:
+                return {'success': False, 'error': f'Invalid scan mode: {mode}'}
+
+            print(f"✅ Scan mode set to: {mode} (mode {self.current_scan_mode})")
+            return {'success': True, 'mode': mode}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def start_scanner(self):
+        """
+        Starts the InvDetect scanner in a subprocess
+        """
+        try:
+            import subprocess
+            import sys
+
+            # Path to InvDetect scanner
+            invdetect_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'InvDetect')
+            scanner_script = os.path.join(invdetect_path, 'main.py')
+
+            if not os.path.exists(scanner_script):
+                return {'success': False, 'error': 'Scanner script not found'}
+
+            # Get current scan mode (default to 1 if not set)
+            scan_mode = getattr(self, 'current_scan_mode', 1)
+
+            # Start scanner in new console window with scan mode as argument
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+            # Run scanner with scan mode as command line argument
+            subprocess.Popen(
+                [sys.executable, scanner_script, str(scan_mode)],
+                cwd=invdetect_path,
+                creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
+
+            print(f"✅ Scanner started in new console with mode {scan_mode}")
+            return {'success': True}
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return {'success': False, 'error': str(e)}
+
+    def get_scan_results(self):
+        """
+        Reads scan results from InvDetect output file
+        Returns: {found: [...], not_found: [...]}
+        """
+        try:
+            # Path to InvDetect files
+            invdetect_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'InvDetect')
+
+            output_file = os.path.join(invdetect_path, 'detected_items.txt')
+            not_detected_file = os.path.join(invdetect_path, 'not_detected.md')
+
+            found_items = []
+            not_found_items = []
+
+            # Read found items (format: count, item_name)
+            if os.path.exists(output_file):
+                with open(output_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        # Skip comments
+                        if line and not line.startswith('#'):
+                            # Format: count, item_name
+                            if ',' in line:
+                                parts = line.split(',', 1)
+                                try:
+                                    count = int(parts[0].strip())
+                                    name = parts[1].strip()
+
+                                    # Look up item in database to get full details
+                                    item_details = self.operations.get_item_by_name(name)
+
+                                    if item_details:
+                                        # Item exists in database - use its details
+                                        item_type = item_details.get('item_type', 'Unknown')
+
+                                        # Use same logic as search_items_local (line 128-131)
+                                        if item_details.get('image_path'):
+                                            # Item has local image cached
+                                            image_url = self._path_to_url(item_details['image_path'])
+                                            print(f"[DEBUG] Item: {name}, Type: {item_type}, Using cached image: {image_url}")
+                                        else:
+                                            # No local image, use placeholder based on item_type
+                                            image_url = f'/images/Placeholder/{item_type}.png'
+                                            print(f"[DEBUG] Item: {name}, Type: {item_type}, Using placeholder: {image_url}")
+
+                                        found_items.append({
+                                            'name': name,
+                                            'count': count,
+                                            'scanned_name': name,  # Same as name since it matched
+                                            'image_url': image_url,
+                                            'item_type': item_type
+                                        })
+                                    else:
+                                        # Item not in database - still add with minimal info
+                                        found_items.append({
+                                            'name': name,
+                                            'count': count,
+                                            'scanned_name': name,
+                                            'image_url': '/images/Placeholder/Unknown.png',
+                                            'item_type': 'Unknown'
+                                        })
+                                except (ValueError, IndexError):
+                                    pass
+
+            # Read not found items (format: Item Name - Page X, Row Y, Col Z)
+            if os.path.exists(not_detected_file):
+                with open(not_detected_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        # Skip comments and headers
+                        if line and not line.startswith('#') and not line.startswith('---'):
+                            # Extract item name (before " - Page")
+                            if ' - Page' in line:
+                                item_name = line.split(' - Page')[0].strip()
+                            else:
+                                item_name = line
+
+                            if item_name:
+                                not_found_items.append({'ocr_text': item_name, 'count': 1})
+
+            return {
+                'success': True,
+                'found': found_items,
+                'not_found': not_found_items
+            }
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return {'success': False, 'error': str(e)}
+
+    def import_scanned_items(self, items):
+        """
+        Imports scanned items into inventory
+        items: [{'name': str, 'count': int}, ...]
+        """
+        try:
+            results = []
+
+            for item_data in items:
+                name = item_data.get('name')
+                count = item_data.get('count', 1)
+
+                if not name:
+                    results.append({'success': False, 'name': '', 'error': 'No name provided'})
+                    continue
+
+                try:
+                    # Try to get item from database
+                    existing_item = self.operations.get_item_by_name(name)
+
+                    if existing_item:
+                        # Update count
+                        new_count = existing_item.get('count', 0) + count
+                        self.operations.update_item_count(name, new_count)
+                        results.append({'success': True, 'name': name, 'action': 'updated', 'count': new_count})
+                    else:
+                        # Item not in DB - try to scrape details
+                        details = self.scraper.get_item_details(name)
+
+                        if details:
+                            # Add item with scraped details
+                            self.add_item(
+                                name=name,
+                                item_type=details.get('item_type'),
+                                image_url=details.get('image_url'),
+                                notes='Imported from InvDetect scan',
+                                initial_count=count
+                            )
+                            results.append({'success': True, 'name': name, 'action': 'added', 'count': count})
+                        else:
+                            # Add item without details
+                            self.operations.add_item(
+                                name=name,
+                                item_type='Unknown',
+                                image_url=None,
+                                image_path=None,
+                                notes='Imported from InvDetect scan (no details found)',
+                                initial_count=count
+                            )
+                            results.append({'success': True, 'name': name, 'action': 'added', 'count': count, 'warning': 'No details found'})
+
+                except Exception as item_error:
+                    results.append({'success': False, 'name': name, 'error': str(item_error)})
+
+            return {'success': True, 'results': results}
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return {'success': False, 'error': str(e)}
+
+    # =========================================================
+    # USER CONFIG (Language persistence)
+    # =========================================================
+
+    def get_user_language(self):
+        """
+        Get saved user language from config file
+        Returns: {'language': 'en'} or {'language': None} if not set
+        """
+        try:
+            if os.path.exists(self.config_file):
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                    return {'success': True, 'language': config.get('language')}
+            return {'success': True, 'language': None}
+        except Exception as e:
+            print(f"Error reading user config: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def set_user_language(self, language):
+        """
+        Save user language to config file
+        language: 'de', 'en', 'fr', or 'es'
+        """
+        try:
+            # Load existing config or create new
+            config = {}
+            if os.path.exists(self.config_file):
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+
+            # Update language
+            config['language'] = language
+
+            # Ensure data directory exists
+            os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
+
+            # Save config
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+
+            print(f"✅ User language saved: {language}")
+            return {'success': True, 'language': language}
+        except Exception as e:
+            print(f"Error saving user config: {e}")
+            return {'success': False, 'error': str(e)}

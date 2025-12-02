@@ -37,7 +37,7 @@ class Window:
     def start(self):
         """Start the application"""
         window = self.create_window()
-        webview.start(debug=True)
+        webview.start(debug=False)
         
         # Cleanup on exit
         self.api.close()

@@ -1,42 +1,42 @@
 # -*- coding: utf-8 -*-
 """
-database.py – lädt einmalig alle Item-Namen aus deiner inventory.db
-Wird von ocr_scanner.py für die Namenskorrektur verwendet
+database.py – loads all item names from your inventory.db once
+Used by ocr_scanner.py for name correction
 """
 
 import sqlite3
 import os
 from config import DB_PATH
 
-# Globale Liste mit allen Item-Namen
+# Global list with all item names
 ITEM_DATABASE = []
 
 def load_database():
     global ITEM_DATABASE
-    if ITEM_DATABASE:  # schon geladen
+    if ITEM_DATABASE:  # already loaded
         return ITEM_DATABASE
 
     if not os.path.exists(DB_PATH):
-        print(f"[DB] Nicht gefunden: {DB_PATH}")
+        print(f"[DB] Not found: {DB_PATH}")
         return []
 
     try:
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
-        
-        # Einfach alle Namen holen – GearCrate hat immer eine Spalte "name"
+
+        # Simply get all names – GearCrate always has a "name" column
         cur.execute("SELECT name FROM items WHERE name IS NOT NULL AND trim(name) != ''")
         rows = cur.fetchall()
         conn.close()
 
         ITEM_DATABASE = sorted({row[0].strip() for row in rows})
-        print(f"[DB] {len(ITEM_DATABASE)} Items aus inventory.db geladen.")
+        print(f"[DB] {len(ITEM_DATABASE)} items loaded from inventory.db.")
 
     except Exception as e:
-        print(f"[DB] Fehler beim Laden: {e}")
+        print(f"[DB] Error loading: {e}")
         ITEM_DATABASE = []
 
     return ITEM_DATABASE
 
-# Beim ersten Import automatisch laden
+# Load automatically on first import
 load_database()

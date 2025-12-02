@@ -18,7 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Listen for language changes
     document.addEventListener('languageChanged', function(e) {
         console.log(`Language changed to: ${e.detail.language}`);
-        
+
+        // Update language selector dropdown
+        if (languageSelect) {
+            languageSelect.value = e.detail.language;
+        }
+
         // Update dynamic content
         updateDynamicContent();
     });
@@ -60,7 +65,7 @@ function updateDynamicContent() {
 
 // Override alert messages to use translations
 window.showNotification = function(messageKey, params) {
-    const message = params ? t(messageKey, params) : t(messageKey);
+    const message = (window.i18n && params) ? window.i18n.t(messageKey, params) : (window.i18n ? window.i18n.t(messageKey) : messageKey);
     
     const notification = document.createElement('div');
     notification.textContent = message;
@@ -85,12 +90,12 @@ window.showNotification = function(messageKey, params) {
 
 // Translated confirm dialogs
 window.confirmTranslated = function(messageKey, params) {
-    const message = params ? t(messageKey, params) : t(messageKey);
+    const message = (window.i18n && params) ? window.i18n.t(messageKey, params) : (window.i18n ? window.i18n.t(messageKey) : messageKey);
     return confirm(message);
 };
 
 // Translated alerts
 window.alertTranslated = function(messageKey, params) {
-    const message = params ? t(messageKey, params) : t(messageKey);
+    const message = (window.i18n && params) ? window.i18n.t(messageKey, params) : (window.i18n ? window.i18n.t(messageKey) : messageKey);
     return alert(message);
 };
