@@ -18,7 +18,7 @@ from database.operations import ItemOperations
 from scraper.cstone import CStoneScraper
 from cache.image_cache import ImageCache
 from cache.gear_sets import GearSetsManager
-
+#
 
 class API:
     # Class-level variable to store webview window reference

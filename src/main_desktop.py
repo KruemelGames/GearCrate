@@ -17,7 +17,7 @@ sys.path.insert(0, project_root)
 from main_browser import GearCrateAPIHandler
 from api.backend import API
 import webview
-
+# 
 
 class DesktopServer:
     """Desktop server with pywebview"""
