@@ -1,1 +1,0 @@
-function e(n){var i=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},o=arguments.length>2?arguments[2]:void 0;r(this,e),this.options=t(t({},$),i),this.options.useExtendedSearch,this._keyStore=new j(this.options.keys),this.setCollection(n,o)}
