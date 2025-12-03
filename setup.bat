@@ -50,9 +50,37 @@ if %errorlevel% neq 0 (
     goto :ASK_INSTALL_PYTHON
 )
 
-for /f "tokens=2" %%a in ('python --version 2^>^&1') do set "PYTHON_VERSION=%%a"
+:: Get Python version using temp file to avoid escaping issues
+python --version > "%TEMP%\pyver.txt" 2>&1
+set /p PYTHON_VERSION_LINE=<"%TEMP%\pyver.txt"
+del "%TEMP%\pyver.txt" 2>nul
+
+:: Extract version number (e.g., "Python 3.11.9" -> "3.11.9")
+for /f "tokens=2" %%a in ("%PYTHON_VERSION_LINE%") do set "PYTHON_VERSION=%%a"
+
 echo [OK] Python !PYTHON_VERSION! found!
 echo [OK] Python !PYTHON_VERSION! found >> "%LOGFILE%"
+
+:: Extract major and minor version (e.g., "3.11.9" -> major=3, minor=11)
+for /f "tokens=1,2 delims=." %%a in ("!PYTHON_VERSION!") do (
+    set "PY_MAJOR=%%a"
+    set "PY_MINOR=%%b"
+)
+
+:: Warn if Python 3.13+
+if !PY_MAJOR! GEQ 3 if !PY_MINOR! GEQ 13 (
+    echo.
+    echo [WARNING] Python !PYTHON_VERSION! detected!
+    echo [WARNING] Python !PYTHON_VERSION! may have compatibility issues >> "%LOGFILE%"
+    echo.
+    echo Python 3.13+ may have compatibility issues with some packages.
+    echo Recommended: Python 3.11 or 3.12
+    echo.
+    echo Do you want to continue anyway?
+    choice /c YN /n /m " [Y] Yes, continue    [N] No, let me install Python 3.11/3.12 "
+    if errorlevel 2 goto :MANUAL_PYTHON
+)
+
 echo.
 goto :INSTALL_REQS
 
@@ -150,11 +178,24 @@ echo [2/3] Installing packages (3-10 minutes)...
 echo [2/3] Installing packages... >> "%LOGFILE%"
 echo.
 
+:: Check if requirements.txt exists
+if not exist "%~dp0requirements.txt" (
+    echo [ERROR] requirements.txt not found!
+    echo [ERROR] requirements.txt not found in %~dp0 >> "%LOGFILE%"
+    echo.
+    echo Please make sure you're running setup.bat from the GearCrate directory.
+    echo.
+    pause
+    exit /b 1
+)
+
 echo [LOG] Upgrading pip... >> "%LOGFILE%"
 python -m pip install --upgrade pip --quiet
 
 echo [LOG] Installing requirements.txt... >> "%LOGFILE%"
-pip install -r requirements.txt --quiet
+echo This may take several minutes...
+echo.
+pip install -r requirements.txt
 
 if %errorlevel% neq 0 (
     echo.
@@ -163,7 +204,20 @@ if %errorlevel% neq 0 (
     echo =========================================
     echo.
     echo [ERROR] pip install failed >> "%LOGFILE%"
-    echo Try manually: pip install -r requirements.txt
+    echo.
+    echo Common solutions:
+    echo.
+    echo 1. If you see "Unknown compiler" or "meson" errors:
+    echo    - Python 3.14 is too new! Use Python 3.11 or 3.12
+    echo    - Uninstall Python 3.14 and run setup.bat again
+    echo.
+    echo 2. If requirements.txt was not found:
+    echo    - Make sure you're in the GearCrate folder
+    echo    - Right-click setup.bat and "Run as Administrator"
+    echo.
+    echo 3. For other errors:
+    echo    - Check setup-log.txt for details
+    echo    - Try: pip install -r requirements.txt
     echo.
     pause
     exit /b 1
