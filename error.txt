@@ -1,1 +1,58 @@
 function e(n){var i=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},o=arguments.length>2?arguments[2]:void 0;r(this,e),this.options=t(t({},$),i),this.options.useExtendedSearch,this._keyStore=new j(this.options.keys),this.setCollection(n,o)}
+
+
+
+
+
+
+Gute Idee! Hier ist eine Zusammenfassung des Problems und was ich versucht habe:
+
+Das Problem:
+An manchen Stellen wird statt dem übersetzten Text "function e(n)..." angezeigt (z.B. bei "Alle", "Favoriten", "Empty Inventory").
+
+Die Ursache:
+Die t() Übersetzungsfunktion wird manchmal nicht richtig aufgerufen oder ist nicht im richtigen Scope verfügbar, sodass die Funktion selbst statt ihres Rückgabewerts angezeigt wird.
+
+Betroffene Dateien:
+1. web/translations/translations.js
+Zeile 199-213: Definiert i18n und t() Funktion
+Problem: t() ist als globale Funktion definiert, aber nicht überall verfügbar
+Was ich geändert habe:
+window.i18n = i18n; (Zeile 202) - macht i18n global verfügbar
+window.t = t; (Zeile 210) - macht t() global verfügbar
+2. web/app.js - Hauptproblem-Datei
+Stellen wo t() verwendet wird und "function e(n)" erscheinen kann:
+
+Zeile ~691-694: applySavedSettingsToUI() - Sortierreihenfolge-Button Text
+Zeile ~792-794: Sort order button click event
+Zeile ~881: "Alle" Button - allBtn.textContent = '📦 ' + t('categoryAll');
+Zeile ~898: "Favoriten" Button - favBtn.textContent = '⭐ ' + t('categoryFavorites');
+Zeile ~1637-1638: Empty inventory message - t('inventoryEmpty') oder t('inventoryCategoryEmpty')
+3. web/i18n-integration.js
+Zeile ~68: showNotification() verwendet t()
+Zeile ~93: confirmTranslated() verwendet t()
+Zeile ~99: alertTranslated() verwendet t()
+Was ich probiert habe:
+❌ window.t = t hinzugefügt - hat nicht geholfen
+❌ Lokale t() Wrapper-Funktion in app.js erstellt - hat ALLES kaputt gemacht (Buttons gingen nicht mehr)
+❌ Alle t() zu window.i18n.t() geändert mit Python-Script - hat auch Buttons kaputt gemacht
+Mein Verdacht:
+Das Problem ist ein Scope/Timing Issue. Die t() Funktion wird in translations.js definiert, aber manchmal ist sie noch nicht verfügbar wenn app.js sie aufrufen will.
+
+Was du probieren könntest:
+Option 1: Konsistenter Aufruf Ändere alle t() Aufrufe zu window.i18n.t() - aber nur an den problematischen Stellen:
+
+Zeile 881: window.i18n.t('categoryAll')
+Zeile 898: window.i18n.t('categoryFavorites')
+Zeile 1637-1638: window.i18n.t('inventoryEmpty')
+Option 2: Null-Check Füge überall einen Check hinzu:
+
+(window.i18n ? window.i18n.t('categoryAll') : 'All')
+
+Option 3: Debug Console Öffne DevTools und prüfe in der Console:
+
+typeof t
+typeof window.t
+typeof window.i18n.t
+
+Schau dir am besten web/app.js Zeile 881, 898 und 1637 an - das sind die kritischen Stellen! 🔍
