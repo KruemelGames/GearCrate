@@ -230,10 +230,20 @@ class InventoryScanner:
         Args:
             scroll_distance: Pixels to scroll (if None, uses dynamic calculation or config default)
             use_dynamic_calculation: If True, calculates scroll distance from scrollbar height
+
+        Scrolls down with adjusted distance.
+
+        Args:
+            scroll_distance: Pixels to scroll (default: config.SCROLL_PIXELS_UP)
         """
         self.check_abort()
 
         log_print(f"  Scrollbar detection...")
+
+
+
+        log_print(f"  Scrollbar detection (distance: {scroll_distance}px)...")
+
 
         # 1. Take screenshot of scroll region
         scroll_shot = pyautogui.screenshot(region=(
@@ -420,7 +430,9 @@ class InventoryScanner:
         """
         found = 0
         consecutive_empty_items = 0  # Counter for consecutive empty items
+
         items_found_this_block = 0   # Track items found in this block
+
 
         # 1. Calculate base Y (start point + offset to center of first row)
         # Y-offset = center of tile
@@ -438,8 +450,10 @@ class InventoryScanner:
             log_print(f"  Block {self.block_counter + 1}: {rows_per_block} rows, {row_step}px step, drift -{drift_correction}px")
 
         # 3. Dynamic row_offsets based on scan mode
+
         # Start from skip_rows to avoid scanning duplicate rows
         row_offsets = [i * row_step for i in range(skip_rows, skip_rows + rows_per_block)]
+        row_offsets = [i * row_step for i in range(rows_per_block)]
 
         for row_idx, offset in enumerate(row_offsets):
             self.check_abort()
@@ -479,6 +493,7 @@ class InventoryScanner:
                     found += 1
                     consecutive_empty_items = 0
                     continue
+
 
                 # Adaptive retry logic:
                 # - 5 attempts when OCR detects text but no DB match
@@ -789,6 +804,12 @@ class InventoryScanner:
             return
 
         try:
+            with open(config.OUTPUT_FILE, 'w', encoding='utf-8') as f:
+                # Sort items by name
+                for item_name in sorted(self.detected_items.keys()):
+                    count = self.detected_items[item_name]
+                    f.write(f"{count}, {item_name}\n")
+
             total_items = sum(self.detected_items.values())
 
             # In Fast Debug Mode, skip writing debug items to file
@@ -872,6 +893,11 @@ class InventoryScanner:
             log_print("Mouse stopped")
 
     def scan_all_tiles(self, scan_mode=1):
+        """
+        Scans all inventory tiles.
+
+        Args:
+            scan_mode: 1 for 1x1 items (default), 2 for 1x2 items (undersuits)
         """
         Scans all inventory tiles.
 
@@ -979,6 +1005,7 @@ class InventoryScanner:
                         scroll_result = self.precise_scroll_down_once()  # Use dynamic calculation
 
                         # Check for scroll completion conditions
+                        # If no scrollbar found, end scan
                         if scroll_result == "NO_SCROLLBAR":
                             log_print("[NO_SCROLLBAR] No scrollbar detected - all items scanned in first block")
                             scan_complete = True

@@ -54,3 +54,25 @@
 1, Ventra Gloves Blue
 4, WK-8 Shoes
 1, Wanderer Boots Forest
+1, Ajax Security Uniform Hat
+1, Burgundy Paisley Bandana (01_01_01)
+1, Chrome Dome Head Gear Minefield
+2, Crusader Industries Hat
+1, Drake Hat Yellow Logo
+1, FirmWear Hard Hat (04_01_01)
+1, Gale Head Cover Brown
+2, Hardline Hard Hat White
+2, IAE 2953 Hat White
+1, Ixonia Helmet Desert Camo
+1, Ixonia Helmet Verdant Steel
+1, Keldur Hat and Oak Goggles
+1, Ketchum Beanie Black
+1, Ketchum Beanie Twilight
+1, MC-Black Hat
+1, MC-Green Hat
+2, Pacifica Hat
+1, Ready-Up Helmet Twilight
+1, Sorel Hat Armadillo
+1, Taos Balaclava and Goggles
+1, TruBarrier Hazard Suit Mask Slate
+1, microTech Hat

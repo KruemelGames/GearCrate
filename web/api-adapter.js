@@ -49,6 +49,7 @@ const api = {
     set_scan_mode: (mode) => apiCall('set_scan_mode', { mode }),
     start_scanner: () => apiCall('start_scanner', {}),
     get_scan_results: () => apiCall('get_scan_results', {}),
+    get_scan_results: () => apiCall('get_scan_results', {}),
     import_scanned_items: (items) => apiCall('import_scanned_items', { items }),
 
     // User config methods
@@ -76,6 +77,7 @@ const api = {
     // Scanner methods (camelCase)
     setScanMode: (mode) => apiCall('set_scan_mode', { mode }),
     startScanner: () => apiCall('start_scanner', {}),
+    getScanResults: () => apiCall('get_scan_results', {}),
     getScanResults: () => apiCall('get_scan_results', {}),
     importScannedItems: (items) => apiCall('import_scanned_items', { items }),
 

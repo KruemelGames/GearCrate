@@ -677,6 +677,7 @@ class API:
                 # Clean up name: strip whitespace and normalize multiple spaces
                 name = ' '.join(name.strip().split())
 
+
                 try:
                     # Try to get item from database
                     existing_item = self.operations.get_item_by_name(name)

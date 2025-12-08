@@ -154,4 +154,85 @@ Scan finished!
 [21:30:39] 
 ============================================================
 [21:30:40] 
+[15:17:33] 
+=== InvDetect - Star Citizen Universal Inventory Scanner ===
+[15:17:33] INSERT → Start Scan | DELETE → Stop | ESC → Exit
+
+[15:17:33] 
+[INFO] Scan mode: 1x1 (Normal)
+[15:17:33] 
+
+[19:05:22] 
+=== InvDetect - Star Citizen Universal Inventory Scanner ===
+[19:05:22] INSERT → Start Scan | DELETE → Stop | ESC → Exit
+
+[19:05:22] 
+[INFO] Scan mode: 1x1 (Normal)
+[19:05:22] 
+Press INSERT to start scan, or ESC to exit...
+[19:05:24] 
+[WINDOW] Searching for StarCitizen.exe process...
+[19:05:24] [WINDOW] Found StarCitizen.exe (PID: 29744)
+[19:05:24] [WINDOW] Switched to: Star Citizen 
+[19:05:25] [INFO] Output file created: detected_items.txt
+[19:05:25] 
+================================================================================
+[19:05:25] SCAN STARTED - Mode: 1x1 (Normal)
+[19:05:25] Rows/Block: 8 | Step: 97px | Blocks: 3
+[19:05:25] ================================================================================
+
+[19:05:25] Scrolling to top...
+[19:05:28] Reset complete
+[19:05:28] 
+================================================================================
+[19:05:28] PAGE #1
+[19:05:28] ================================================================================
+
+[19:05:28] 
+=== SCANNING BLOCK 1 ===
+[19:05:28]   Block 1: 8 rows, 97px step, drift -0px
+[19:05:30]   → Keldur Hat and Oak Goggles (#1)
+[19:05:31]   → Crusader Industries Hat (#1)
+[19:05:33]   → Drake Hat Yellow Logo (#1)
+[19:05:34]   → IAE 2953 Hat White (#1)
+[19:05:35]   → Ixonia Helmet Verdant Steel (#1)
+[19:05:37]   → Ready-Up Helmet Twilight (#1)
+[19:05:38]   → Ketchum Beanie Twilight (#1)
+[19:05:39]   → Crusader Industries Hat (#2)
+[19:05:41]   → Ixonia Helmet Desert Camo (#1)
+[19:05:42]   → FirmWear Hard Hat (04_01_01) (#1)
+[19:05:43]   → Ajax Security Uniform Hat (#1)
+[19:05:45]   → Burgundy Paisley Bandana (01_01_01) (#1)
+[19:05:46]   → MC-Black Hat (#1)
+[19:05:47]   → Gale Head Cover Brown (#1)
+[19:05:49]   → IAE 2953 Hat White (#2)
+[19:05:50]   → TruBarrier Hazard Suit Mask Slate (#1)
+[19:05:51]   → MC-Green Hat (#1)
+[19:05:53]   → Taos Balaclava and Goggles (#1)
+[19:05:54]   → Hardline Hard Hat White (#1)
+[19:05:55]   → Ketchum Beanie Black (#1)
+[19:05:57]   → Sorel Hat Armadillo (#1)
+[19:05:58]   → Hardline Hard Hat White (#2)
+[19:05:59]   → Pacifica Hat (#1)
+[19:06:01]   → Pacifica Hat (#2)
+[19:06:02]   → microTech Hat (#1)
+[19:06:03]   → Chrome Dome Head Gear Minefield (#1)
+[19:06:05]     [RETRY] 1/2: No text
+[19:06:06]     [RETRY] All 2 attempts failed - empty slot
+[19:06:06]   [EMPTY] Checking for next page...
+[19:06:06] [BUTTON] Brightness: 61.3 → Inactive
+[19:06:06]   [INACTIVE] No more pages → Ending scan
+[19:06:06] [END] Button inactive → Scan complete
+[19:06:06] 
+Scan finished!
+[19:06:06] Mouse stopped
+[19:06:06] 
+[RESULTS] 26 items scanned (22 unique)
+[19:06:06] [RESULTS] Saved to detected_items.txt
+[19:06:06] 
+✅ SCAN COMPLETE! See detected_items.txt
+[19:06:06] 
+============================================================
+[19:06:07] 
+
 Press INSERT to start scan, or ESC to exit...

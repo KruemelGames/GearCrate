@@ -214,6 +214,24 @@ window.tr = tr;
 
 // Debug: Log that translation system is ready
 console.log('🌍 Translation system loaded. tr() function available:', typeof window.tr);
+    return i18n.t(key, params);
+}
+
+// Make tr() globally accessible
+window.tr = tr;
+
+// Debug: Log that translation system is ready
+console.log('🌍 Translation system loaded. tr() function available:', typeof window.tr);
+// Helper function for quick translations
+function t(key, params) {
+    return i18n.t(key, params);
+}
+
+// Make t() globally accessible
+window.t = t;
+
+// Debug: Log that translation system is ready
+console.log('🌍 Translation system loaded. t() function available:', typeof window.t);
 
 // Update UI when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
