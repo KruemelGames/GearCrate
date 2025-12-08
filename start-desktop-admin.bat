@@ -26,24 +26,27 @@ echo ====================================
 echo GearCrate - Desktop Mode (ADMIN)
 echo ====================================
 echo.
-echo Dieser Modus startet GearCrate als
-echo Desktop-Anwendung mit Admin-Rechten.
+echo This mode starts GearCrate as
+echo desktop application with admin rights.
 echo.
 echo Features:
-echo - HTTP Server im Hintergrund
-echo - Desktop-Fenster
-echo - InvDetect Scanner mit vollen Rechten
+echo - HTTP server in background
+echo - Desktop window
+echo - InvDetect Scanner with full privileges
 echo.
 
 REM Check if Python is installed
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo FEHLER: Python ist nicht installiert!
+    echo ERROR: Python is not installed!
+    echo.
+    echo Please run setup.bat first to install all requirements.
+    echo.
     pause
     exit /b 1
 )
 
-echo Starte GearCrate Desktop (Admin)...
+echo Starting GearCrate Desktop (Admin)...
 echo Working Directory: %CD%
 echo.
 
@@ -53,12 +56,14 @@ python src/main_desktop.py
 if errorlevel 1 (
     echo.
     echo ====================================
-    echo FEHLER beim Starten!
+    echo ERROR during startup!
     echo ====================================
     echo.
-    echo Moegliche Ursachen:
-    echo - pywebview nicht installiert
-    echo - Port 8080 bereits belegt
+    echo Possible causes:
+    echo - pywebview not installed
+    echo - Port 8080 already in use
+    echo.
+    echo Try running setup.bat again to fix missing dependencies.
     echo.
     pause
 )

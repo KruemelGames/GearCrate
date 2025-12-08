@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+test_scroll.py - Test script for dynamic scroll calculation
+Only scrolls down without OCR scanning to verify scroll distances.
+"""
 import keyboard
 import time
 import os
@@ -14,11 +18,6 @@ import psutil
 if os.path.exists(config.LOG_FILE):
     try:
         os.remove(config.LOG_FILE)
-    except:
-        pass
-if os.path.exists(config.OUTPUT_FILE):
-    try:
-        os.remove(config.OUTPUT_FILE)
     except:
         pass
 
@@ -76,7 +75,7 @@ def switch_to_star_citizen():
                         found_title = window_title
         except:
             pass
-        return True  # Always continue enumeration (returning False causes error)
+        return True  # Always continue enumeration
 
     try:
         win32gui.EnumWindows(enum_windows_callback, None)
@@ -99,52 +98,61 @@ def switch_to_star_citizen():
         return False
 
 def main():
-    log_print("\n=== InvDetect - Star Citizen Universal Inventory Scanner ===")
-    log_print("INSERT → Start Scan | DELETE → Stop | ESC → Exit\n")
+    log_print("\n" + "="*80)
+    log_print("🧪 SCROLL CALCULATION TEST - InvDetect")
+    log_print("="*80)
+    log_print("This script only tests scrolling WITHOUT scanning items.")
+    log_print("It will scroll down multiple times and log the calculated distances.")
+    log_print("")
+    log_print("Controls:")
+    log_print("  INSERT → Start test")
+    log_print("  DELETE → Stop test")
+    log_print("  ESC    → Exit")
+    log_print("="*80 + "\n")
 
-    # Get scan mode from command line argument (passed by GearCrate)
+    # Get max scrolls from command line (optional)
     import sys
-    scan_mode = int(sys.argv[1]) if len(sys.argv) > 1 else 1  # Default to 1 (1x1) if not provided
-    mode_name = "1x2 (Undersuits)" if scan_mode == 2 else "1x1 (Normal)"
+    max_scrolls = int(sys.argv[1]) if len(sys.argv) > 1 else 10
 
-    log_print(f"\n[INFO] Scan mode: {mode_name}")
+    log_print(f"[INFO] Max scrolls per test: {max_scrolls}")
+    log_print(f"[INFO] Debug mode: {config.DEBUG_SCROLL_CALCULATION}")
+    log_print(f"[INFO] Correction factor: {config.SCROLL_CORRECTION_FACTOR}")
 
-    # Main loop - allows multiple scans
+    # Main loop - allows multiple tests
     while True:
-        log_print("\nPress INSERT to start scan, or ESC to exit...")
+        log_print("\nPress INSERT to start test, or ESC to exit...")
 
         # Wait for INSERT or ESC
         while True:
             if keyboard.is_pressed('insert'):
                 break
             if keyboard.is_pressed('esc'):
-                log_print("\n[EXIT] ESC pressed - Exiting scanner...")
+                log_print("\n[EXIT] ESC pressed - Exiting test...")
                 time.sleep(1)
                 return
             time.sleep(0.05)
 
         time.sleep(0.3)
 
-        # Switch to Star Citizen window before starting scan
+        # Switch to Star Citizen window before starting test
         if not switch_to_star_citizen():
-            log_print("\n[ERROR] Cannot start scan without Star Citizen window.")
-            log_print("[ERROR] Please start Star Citizen and try again...")
+            log_print("\n[ERROR] Cannot start test without Star Citizen window.")
+            log_print("[ERROR] Please start Star Citizen and open Universal Inventory...")
             time.sleep(3)
             continue  # Back to waiting for INSERT
 
         scanner = InventoryScanner()
 
         try:
-            scanner.scan_all_tiles(scan_mode)
-            log_print("\n✅ SCAN COMPLETE! See detected_items.txt")
+            scanner.test_scroll_calculation(max_scrolls)
+            log_print("\n✅ TEST COMPLETE! Check scan_log.txt for details.")
 
         except (KeyboardInterrupt, ScanAbortedException):
-            log_print("\n⚠️ Scan aborted (DELETE pressed).")
-            log_print("Partial results saved.")
+            log_print("\n⚠️ Test aborted (DELETE pressed).")
 
         except pyautogui.FailSafeException:
             log_print("\n⚠️ PyAutoGUI Fail-Safe triggered (mouse moved to screen corner)")
-            log_print("Scan aborted.")
+            log_print("Test aborted.")
 
         except Exception as e:
             log_print(f"\n❌ UNEXPECTED ERROR: {e}")
@@ -153,8 +161,8 @@ def main():
             log_print("\nPress INSERT to try again, or ESC to exit...")
             time.sleep(2)
 
-        # After scan (successful or aborted), wait a moment before next scan
-        log_print("\n" + "="*60)
+        # After test, wait a moment before next test
+        log_print("\n" + "="*80)
         time.sleep(1)
 
 if __name__ == "__main__":

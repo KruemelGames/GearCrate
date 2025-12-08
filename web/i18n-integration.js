@@ -14,11 +14,16 @@ document.addEventListener('DOMContentLoaded', function() {
             i18n.setLanguage(newLang);
         });
     }
-    
+    //
     // Listen for language changes
     document.addEventListener('languageChanged', function(e) {
         console.log(`Language changed to: ${e.detail.language}`);
-        
+
+        // Update language selector dropdown
+        if (languageSelect) {
+            languageSelect.value = e.detail.language;
+        }
+
         // Update dynamic content
         updateDynamicContent();
     });
@@ -30,12 +35,12 @@ function updateDynamicContent() {
     const sortOrderBtn = document.getElementById('sort-order-btn');
     if (sortOrderBtn) {
         if (currentSortOrder === 'asc') {
-            const ascText = i18n.t('sortAscending');
+            const ascText = window.tr ? window.tr('sortAscending') : 'Ascending';
             if (typeof ascText === 'string') {
                 sortOrderBtn.textContent = '⬇️ ' + ascText.replace('⬇️ ', '');
             }
         } else {
-            const descText = i18n.t('sortDescending');
+            const descText = window.tr ? window.tr('sortDescending') : 'Descending';
             if (typeof descText === 'string') {
                 sortOrderBtn.textContent = '⬆️ ' + descText.replace('⬆️ ', '');
             }
@@ -60,7 +65,7 @@ function updateDynamicContent() {
 
 // Override alert messages to use translations
 window.showNotification = function(messageKey, params) {
-    const message = params ? t(messageKey, params) : t(messageKey);
+    const message = (window.tr && params) ? window.tr(messageKey, params) : (window.tr ? window.tr(messageKey) : messageKey);
     
     const notification = document.createElement('div');
     notification.textContent = message;
@@ -85,12 +90,12 @@ window.showNotification = function(messageKey, params) {
 
 // Translated confirm dialogs
 window.confirmTranslated = function(messageKey, params) {
-    const message = params ? t(messageKey, params) : t(messageKey);
+    const message = (window.tr && params) ? window.tr(messageKey, params) : (window.tr ? window.tr(messageKey) : messageKey);
     return confirm(message);
 };
 
 // Translated alerts
 window.alertTranslated = function(messageKey, params) {
-    const message = params ? t(messageKey, params) : t(messageKey);
+    const message = (window.tr && params) ? window.tr(messageKey, params) : (window.tr ? window.tr(messageKey) : messageKey);
     return alert(message);
 };

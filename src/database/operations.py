@@ -160,11 +160,11 @@ class ItemOperations:
         return [dict(row) for row in self.db.cursor.fetchall()]
         
     def get_category_stats(self):
-        """Get inventory stats by item category (only counts > 0)"""
+        """Get inventory stats by item category (shows all categories, even with count 0)"""
         self.db.cursor.execute('''
-            SELECT item_type, SUM(count) as total_count 
-            FROM items 
-            WHERE item_type IS NOT NULL AND count > 0
+            SELECT item_type, SUM(count) as total_count
+            FROM items
+            WHERE item_type IS NOT NULL
             GROUP BY item_type
         ''')
         stats = {row['item_type']: row['total_count'] for row in self.db.cursor.fetchall()}

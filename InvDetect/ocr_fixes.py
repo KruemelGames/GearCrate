@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-ocr_fixes.py - Konfigurationsdatei für OCR-Korrekturen
-Hier können häufige OCR-Fehler definiert werden, die automatisch korrigiert werden sollen.
+ocr_fixes.py - Configuration file for OCR corrections
+Common OCR errors that should be automatically corrected can be defined here.
 """
 
-# Dictionary mit OCR-Fehlern und ihren Korrekturen
-# Format: "Falsch erkannter Text": "Korrekter Text"
+# Dictionary with OCR errors and their corrections
+# Format: "Incorrectly recognized text": "Correct text"
 OCR_FIXES = {
-    # === Bekannte Probleme ===
+    # === Known issues ===
     "Olve": "Olive",
     "Helment": "Helmet",
     "Hel met": "Helmet",
@@ -16,7 +16,7 @@ OCR_FIXES = {
     "CBH-3": "CBH-3",
     "Harizon": "Horizon",  # a ↔ o
 
-    # === Aus Log erkannte Fehler ===
+    # === Errors detected from logs ===
     "@racle Helmet": "Oracle Helmet",
     "Harizon Helmet Rust Society": "Horizon Helmet Rust Society",
     "Paladin Helmet Black/ Silver": "Paladin Helmet Black/Silver",
@@ -30,7 +30,7 @@ OCR_FIXES = {
     "@RC-mkx Helmet Autumn": "ORC-mkX Helmet Autumn",
     "Argus Helmet Black/White/ Violet": "Argus Helmet Black/White/Violet",
     "Pembroke Helmet RSIIvory Edition": "Pembroke Helmet RSI Ivory Edition",
-    "Aztalan Helmet Epoque": "Aztalan Helmet Epoque",  # Falls falsch, hier korrigieren
+    "Aztalan Helmet Epoque": "Aztalan Helmet Epoque",  # Correct here if wrong
     "Aril Legs Modified)": "Aril Legs (Modified)",
     "Chamar Pants": "Chamar Pants (08_01_01)",
     "Morozov-SHcore": "Morozov-SH Core",
@@ -42,48 +42,48 @@ OCR_FIXES = {
     "Z1iuf Gloves": "2Tuf Gloves",
     "Z1uf Gloves": "2Tuf Gloves",
     "ztuf Gloves": "2Tuf Gloves",
-    # === Zahlen-Buchstaben Verwechslungen ===
+    # === Number-letter confusions ===
     "6-2": "G-2",   # 6 ↔ G
     "0RC": "ORC",   # 0 ↔ O
     "@RC": "ORC",   # @ ↔ O
     "R5I": "RSI",   # 5 ↔ S
     "R51": "RSI",   # 5+1 ↔ S+I
-    "1-5": "I-5",   # 1 ↔ I (wenn I gemeint ist)
+    "1-5": "I-5",   # 1 ↔ I (when I is meant)
     "8CS": "BCS",   # 8 ↔ B
     "C-S4": "C-54", # S ↔ 5
 
-    # === Fehlende/falsche Bindestriche ===
+    # === Missing/wrong hyphens ===
     "J5": "J-5",
     "J 5": "J-5",
     "G2": "G-2",
     "G 2": "G-2",
 
-    # === Groß-/Kleinschreibung ===
+    # === Upper/lowercase ===
     "orc-mkx": "ORC-mkX",
     "cbh-3": "CBH-3",
     "adp-mk4": "ADP-mk4",
 }
 
-# Zusätzliche Zeichen, die entfernt werden sollen
+# Additional characters to be removed
 CHARS_TO_REMOVE = [
-    '"',  # Anführungszeichen am Ende
-    "'",  # Einfache Anführungszeichen
+    '"',  # Quotation marks at end
+    "'",  # Single quotation marks
 ]
 
 def get_fixes():
     """
-    Gibt das OCR-Fixes Dictionary zurück.
+    Returns the OCR fixes dictionary.
 
     Returns:
-        dict: Dictionary mit OCR-Fehlern und Korrekturen
+        dict: Dictionary with OCR errors and corrections
     """
     return OCR_FIXES.copy()
 
 def get_chars_to_remove():
     """
-    Gibt die Liste der zu entfernenden Zeichen zurück.
+    Returns the list of characters to remove.
 
     Returns:
-        list: Liste mit Zeichen die entfernt werden sollen
+        list: List of characters that should be removed
     """
     return CHARS_TO_REMOVE.copy()

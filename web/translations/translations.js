@@ -1,6 +1,6 @@
 // Translation System - Mehrsprachiges UI
 // Unterstützte Sprachen: Deutsch, English, Français, Español
-
+//
 class TranslationSystem {
     constructor() {
         this.translations = {
@@ -9,12 +9,14 @@ class TranslationSystem {
             fr: fr,
             es: es
         };
-        
+
         this.supportedLanguages = ['de', 'en', 'fr', 'es'];
         this.defaultLanguage = 'en';
         this.currentLanguage = this.detectLanguage();
-        
+
         console.log(`🌍 Language detected: ${this.currentLanguage}`);
+        console.log(`📦 localStorage language: ${localStorage.getItem('language')}`);
+        console.log(`🌐 Browser language: ${navigator.language || navigator.userLanguage}`);
     }
     
     /**
@@ -22,25 +24,54 @@ class TranslationSystem {
      * Fallback to English if language not supported
      */
     detectLanguage() {
-        // Check localStorage first
+        // Check localStorage first (for browser mode compatibility)
         const saved = localStorage.getItem('language');
         if (saved && this.supportedLanguages.includes(saved)) {
             return saved;
         }
-        
+
         // Get browser language
         const browserLang = navigator.language || navigator.userLanguage;
-        
+
         // Extract primary language code (e.g., 'de' from 'de-DE', 'es' from 'es-MX')
         const langCode = browserLang.split('-')[0].toLowerCase();
-        
+
         // Check if supported
         if (this.supportedLanguages.includes(langCode)) {
             return langCode;
         }
-        
+
         // Fallback to English
         return this.defaultLanguage;
+    }
+
+    /**
+     * Load saved language from backend (for pywebview persistence)
+     */
+    async loadSavedLanguage() {
+        console.log('[DEBUG] loadSavedLanguage() called');
+        console.log('[DEBUG] typeof api:', typeof api);
+
+        try {
+            // Try to get saved language from backend API
+            if (typeof api !== 'undefined') {
+                console.log('[DEBUG] Calling api.get_user_language()...');
+                const result = await api.get_user_language();
+                console.log('[DEBUG] Result:', result);
+
+                if (result.success && result.language && this.supportedLanguages.includes(result.language)) {
+                    console.log(`📂 Loaded saved language from config: ${result.language}`);
+                    this.currentLanguage = result.language;
+                    this.updateUI();
+                } else {
+                    console.log('[DEBUG] Not loading language. Success:', result.success, 'Language:', result.language, 'Supported:', this.supportedLanguages.includes(result.language));
+                }
+            } else {
+                console.log('[DEBUG] api is undefined');
+            }
+        } catch (e) {
+            console.error('ℹ️ Could not load saved language from backend:', e);
+        }
     }
     
     /**
@@ -51,14 +82,34 @@ class TranslationSystem {
             console.error(`Language "${langCode}" not supported`);
             return false;
         }
-        
+
         this.currentLanguage = langCode;
-        localStorage.setItem('language', langCode);
-        console.log(`🌍 Language changed to: ${langCode}`);
-        
+
+        // Save to localStorage (for browser mode)
+        try {
+            localStorage.setItem('language', langCode);
+            console.log(`🌍 Language changed to: ${langCode}`);
+            console.log(`✅ Verified localStorage save: ${localStorage.getItem('language')}`);
+        } catch (e) {
+            console.error(`❌ Error saving to localStorage:`, e);
+        }
+
+        // Also save to backend config file (for pywebview persistence)
+        if (typeof api !== 'undefined') {
+            api.set_user_language(langCode).then(result => {
+                if (result.success) {
+                    console.log(`💾 Language saved to config file: ${langCode}`);
+                } else {
+                    console.error(`❌ Error saving language to config file:`, result.error);
+                }
+            }).catch(e => {
+                console.log('ℹ️ Could not save to backend (normal in browser mode)');
+            });
+        }
+
         // Update UI
         this.updateUI();
-        
+
         return true;
     }
     
@@ -147,12 +198,30 @@ class TranslationSystem {
 // Initialize global translation system
 const i18n = new TranslationSystem();
 
-// Helper function for quick translations
-function t(key, params) {
+// Make i18n globally accessible
+window.i18n = i18n;
+
+/**
+ * FIXED: Renamed global helper from 't' to 'tr' to avoid collision
+ * with minified libraries (like Fuse.js) that use 't' internally.
+ */
+function tr(key, params) {
     return i18n.t(key, params);
 }
+
+// Make tr() globally accessible
+window.tr = tr;
+
+// Debug: Log that translation system is ready
+console.log('🌍 Translation system loaded. tr() function available:', typeof window.tr);
 
 // Update UI when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     i18n.updateUI();
+
+    // Load saved language from backend after a short delay
+    // This ensures api-adapter.js is loaded first
+    setTimeout(() => {
+        i18n.loadSavedLanguage();
+    }, 100);
 });

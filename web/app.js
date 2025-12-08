@@ -19,7 +19,7 @@ function getItemIcon(item, size = 'medium') {
         }
         return localImageUrl;
     }
-
+	//
     // No local image - return placeholder path based on item type
     const partTypeMapping = {
         'helmet': 'Helmet',
@@ -688,9 +688,9 @@ function applySavedSettingsToUI() {
     const sortOrderBtn = document.getElementById('sort-order-btn');
     if (sortOrderBtn) {
         if (currentSortOrder === 'asc') {
-            sortOrderBtn.textContent = '⬇️ Aufsteigend';
+            sortOrderBtn.textContent = '⬇️ ' + tr('sortAscending').replace('⬇️ ', '');
         } else {
-            sortOrderBtn.textContent = '⬆️ Absteigend';
+            sortOrderBtn.textContent = '⬆️ ' + tr('sortDescending').replace('⬆️ ', '');
         }
     }
 }
@@ -787,9 +787,9 @@ function setupEventListeners() {
             currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
             // Update button text
             if (currentSortOrder === 'asc') {
-                this.textContent = '⬇️ ' + t('sortAscending').replace('⬇️ ', '');
+                this.textContent = '⬇️ ' + tr('sortAscending').replace('⬇️ ', '');
             } else {
-                this.textContent = '⬆️ ' + t('sortDescending').replace('⬆️ ', '');
+                this.textContent = '⬆️ ' + tr('sortDescending').replace('⬆️ ', '');
             }
             // ÄNDERUNG 3: Sortierreihenfolge speichern
             saveSortAndFilterSettings();
@@ -877,7 +877,7 @@ async function loadCategories() {
         allBtn.className = 'category-btn';
         // ÄNDERUNG 4: Aktiver Zustand durch currentCategoryFilter gesteuert
         if (currentCategoryFilter === '') allBtn.classList.add('active');
-        allBtn.textContent = '📦 Alle';
+        allBtn.textContent = '📦 ' + tr('categoryAll');
         allBtn.dataset.category = '';
         allBtn.addEventListener('click', function() {
             updateCategoryActiveState(this);
@@ -893,7 +893,7 @@ async function loadCategories() {
         favBtn.className = 'category-btn';
         // ÄNDERUNG 6: Aktiver Zustand durch currentCategoryFilter gesteuert
         if (currentCategoryFilter === 'Favorites') favBtn.classList.add('active');
-        favBtn.textContent = '⭐ Favoriten';
+        favBtn.textContent = '⭐ ' + tr('categoryFavorites');
         favBtn.dataset.category = 'Favorites';
         // Spezielles Styling für Favoriten-Button (optional via CSS data-category selector)
         favBtn.addEventListener('click', function() {
@@ -928,7 +928,7 @@ async function loadCategories() {
         console.error('Error loading categories:', error);
         const buttonGrid = document.getElementById('category-buttons');
         if (buttonGrid) {
-            buttonGrid.innerHTML = `<div style="color: #f44; padding: 10px;">${t('categoryLoadError')}</div>`;
+            buttonGrid.innerHTML = `<div style="color: #f44; padding: 10px;">${tr('categoryLoadError')}</div>`;
         }
     }
 }
@@ -967,7 +967,7 @@ function resetSearchLimit() {
     searchLimitSelect.value = '25';
     saveSearchLimit(25);
     console.log('Search limit reset to 25');
-    showNotification(t('searchLimitReset'));
+    showNotification(tr('searchLimitReset'));
 }
 
 function showNotification(message) {
@@ -1125,7 +1125,7 @@ async function handleSearch(query) {
     } catch (error) {
         console.error('Search error:', error);
         const resultsDiv = document.getElementById('search-results');
-        resultsDiv.innerHTML = `<div style="padding: 10px; color: #f44;">${t('searchError')}</div>`;
+        resultsDiv.innerHTML = `<div style="padding: 10px; color: #f44;">${tr('searchError')}</div>`;
         resultsDiv.classList.remove('hidden');
     }
 }
@@ -1253,11 +1253,11 @@ function displaySearchResults(localResults, totalCount) {
             infoDiv.style.fontSize = '12px';
             infoDiv.style.borderBottom = '1px solid #444';
             
-            // FIXED: Fallback für t() Funktion
+            // FIXED: Fallback für tr() Funktion
             let infoText = `Zeige ${localResults.length} von ${totalCount} Ergebnissen`;
             if (typeof t === 'function') {
                 try {
-                    const translated = t('searchShowingResults', {shown: localResults.length, total: totalCount});
+                    const translated = tr('searchShowingResults', {shown: localResults.length, total: totalCount});
                     // Prüfe ob Übersetzung ein String ist (nicht ein Objekt oder Funktion)
                     if (typeof translated === 'string') {
                         infoText = translated;
@@ -1282,11 +1282,11 @@ function displaySearchResults(localResults, totalCount) {
         
         resultsDiv.classList.remove('hidden');
     } else {
-        // FIXED: Fallback für t() Funktion
+        // FIXED: Fallback für tr() Funktion
         let noResultsText = 'Keine Ergebnisse gefunden';
         if (typeof t === 'function') {
             try {
-                const translated = t('searchNoResults');
+                const translated = tr('searchNoResults');
                 if (typeof translated === 'string') {
                     noResultsText = translated;
                 }
@@ -1518,7 +1518,7 @@ async function quickUpdateCount(item, delta, countSpan = null, minusBtn = null) 
         }
     } catch (error) {
         console.error('Error updating count:', error);
-        alert(t('errorUpdating'));
+        alert(tr('errorUpdating'));
     }
 }
 
@@ -1546,13 +1546,13 @@ async function addItemToInventory() {
             hideSearchResults();
             hideItemPreview();
             
-            alert(t('itemAdded', {name: currentItem.name}));
+            alert(tr('itemAdded', {name: currentItem.name}));
         } else {
-            alert(t('errorAdding') + ': ' + (result.error || 'Unknown error'));
+            alert(tr('errorAdding') + ': ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error adding item:', error);
-        alert(t('errorAdding'));
+        alert(tr('errorAdding'));
     }
 }
 
@@ -1579,11 +1579,11 @@ async function toggleFavorite(itemName, isFavorite) {
             // Optional: Auch Stats updaten, da sich die Favorites-Kategorie geändert hat
             await loadStats();
         } else {
-            alert(t('errorUpdating') + ': ' + (result.error || 'Unknown error'));
+            alert(tr('errorUpdating') + ': ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error toggling favorite:', error);
-        alert(t('errorUpdating'));
+        alert(tr('errorUpdating'));
     }
 }
 
@@ -1619,7 +1619,7 @@ async function loadInventory() {
     } catch (error) {
         console.error('Error loading inventory:', error);
         const grid = document.getElementById('inventory-grid');
-        grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #f44;">${t('inventoryLoadError')}</p>`;
+        grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #f44;">${tr('inventoryLoadError')}</p>`;
     }
 }
 
@@ -1629,8 +1629,8 @@ function displayInventory(items) {
 
     if (!items || items.length === 0) {
         const message = currentCategoryFilter 
-            ? t('inventoryCategoryEmpty', {category: currentCategoryFilter})
-            : t('inventoryEmpty');
+            ? tr('inventoryCategoryEmpty', {category: currentCategoryFilter})
+            : tr('inventoryEmpty');
         grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #888;">${message}</p>`;
         return;
     }
@@ -1857,7 +1857,7 @@ async function showItemModal(item) {
             const newCount = parseInt(newCountInput.value) || 0;
             
             if (newCount <= 0) {
-                const confirmed = confirm(t('modalConfirmZero', {name: itemName}));
+                const confirmed = confirm(tr('modalConfirmZero', {name: itemName}));
                 if (!confirmed) {
                     newCountInput.value = item.count;
                     return;
@@ -1891,7 +1891,7 @@ async function autoSaveCount(itemName, newCount) {
         console.log(`✅ Auto-saved count for ${itemName}: ${newCount}`);
     } catch (error) {
         console.error('Error auto-saving count:', error);
-        alert(t('errorAutoSave'));
+        alert(tr('errorAutoSave'));
     }
 }
 
@@ -1922,7 +1922,7 @@ function changeCount(delta) {
 async function deleteItem() {
     if (!selectedItemForModal) return;
     
-    if (confirm(t('modalConfirmDelete', {name: selectedItemForModal.name}))) {
+    if (confirm(tr('modalConfirmDelete', {name: selectedItemForModal.name}))) {
         try {
             const itemName = selectedItemForModal.name;
             await api.delete_item(itemName);
@@ -1936,7 +1936,7 @@ async function deleteItem() {
             closeModal();
         } catch (error) {
             console.error('Error deleting item:', error);
-            alert(t('errorDeleting'));
+            alert(tr('errorDeleting'));
         }
     }
 }
@@ -1962,7 +1962,7 @@ async function loadStats() {
             if (sortedCategories.length > 0) {
                 // Titel für Kategorie-Stats
                 const title = document.createElement('h3');
-                title.textContent = t('statsByCategory');
+                title.textContent = tr('statsByCategory');
                 title.style.color = '#00d9ff';
                 title.style.fontSize = '1.2em';
                 title.style.marginTop = '20px';
@@ -2073,7 +2073,7 @@ function setupStickyHeaderScrolling() {
 // IMPORT FROM SC VIEW LOGIC
 // ========================================
 
-let currentScanMode = 1; // 1 = 1x1, 2 = 1x2
+let currentScanMode = '1x1'; // '1x1' or '1x2'
 let importFoundItems = [];
 let importNotFoundItems = [];
 let undoStack = [];
@@ -2092,7 +2092,8 @@ function setupImportView() {
         btn.addEventListener('click', function() {
             modeBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            currentScanMode = parseInt(this.getAttribute('data-mode'));
+            const modeNum = this.getAttribute('data-mode');
+            currentScanMode = modeNum === '1' ? '1x1' : '1x2';
             console.log(`Selected scan mode: ${currentScanMode}`);
         });
     });
@@ -2147,7 +2148,7 @@ async function startScan() {
 
     try {
         // Set scan mode in backend
-        const modeResult = await apiRequest('set_scan_mode', { mode: currentScanMode });
+        const modeResult = await api.set_scan_mode(currentScanMode);
 
         if (!modeResult.success) {
             alert('Fehler beim Setzen des Scan-Modus: ' + modeResult.error);
@@ -2157,7 +2158,7 @@ async function startScan() {
         console.log('✅ Scan mode set to:', currentScanMode);
 
         // Start scanner
-        const scanResult = await apiRequest('start_scanner', {});
+        const scanResult = await api.start_scanner();
 
         if (!scanResult.success) {
             alert('Fehler beim Starten des Scanners: ' + scanResult.error);
@@ -2181,11 +2182,10 @@ async function loadScanResults() {
     console.log('Loading scan results...');
 
     try {
-        const response = await fetch('/api/get_scan_results');
-        const data = await response.json();
+        const data = await api.get_scan_results();
 
         if (!data.success) {
-            alert('Fehler beim Laden der Scan-Ergebnisse');
+            alert('Fehler beim Laden der Scan-Ergebnisse: ' + (data.error || 'Unknown error'));
             return;
         }
 
@@ -2262,9 +2262,21 @@ function displayImportResults() {
         ? importFoundItems.filter(item => item.item_type === currentImportCategoryFilter)
         : importFoundItems;
 
-    // Update count
-    document.getElementById('found-count').textContent = filteredItems.length;
-    document.getElementById('notfound-count').textContent = importNotFoundItems.length;
+    // Update count with null checks
+    const foundCountEl = document.getElementById('found-count');
+    const notFoundCountEl = document.getElementById('notfound-count');
+
+    if (foundCountEl) {
+        foundCountEl.textContent = filteredItems.length;
+    } else {
+        console.error('Element with id "found-count" not found!');
+    }
+
+    if (notFoundCountEl) {
+        notFoundCountEl.textContent = importNotFoundItems.length;
+    } else {
+        console.error('Element with id "notfound-count" not found!');
+    }
 
     // Display found items grid
     const grid = document.getElementById('import-found-grid');
@@ -2400,7 +2412,7 @@ async function importItems() {
             count: item.count
         }));
 
-        const result = await apiRequest('import_scanned_items', { items: itemsToImport });
+        const result = await api.import_scanned_items(itemsToImport);
 
         if (!result.success) {
             alert('Fehler beim Importieren: ' + result.error);
@@ -2501,7 +2513,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearCacheBtn = document.getElementById('clear-cache-btn');
     if (clearCacheBtn) {
         clearCacheBtn.addEventListener('click', async function() {
-            if (confirm(i18n.t('confirmClearCache') || 'Clear website cache and reload? This will remove all cached data.')) {
+            if (confirm((window.tr ? window.tr('confirmClearCache') : null) || 'Clear website cache and reload? This will remove all cached data.')) {
                 try {
                     // Clear localStorage
                     const language = localStorage.getItem('language'); // Save language
@@ -2530,7 +2542,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
 
                     console.log('✅ Cache cleared');
-                    alert(i18n.t('cacheCleared') || 'Cache cleared! Page will reload.');
+                    alert((window.tr ? window.tr('cacheCleared') : null) || 'Cache cleared! Page will reload.');
                     location.reload(true);
                 } catch (e) {
                     console.error('Error clearing cache:', e);
@@ -2559,11 +2571,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearInventoryBtn = document.getElementById('clear-inventory-btn');
     if (clearInventoryBtn) {
         clearInventoryBtn.addEventListener('click', async function() {
-            if (confirm(i18n.t('confirmClearInventory') || 'Set all item counts to 0? This will clear your entire inventory but keep items in the database.')) {
+            if (confirm((window.tr ? window.tr('confirmClearInventory') : null) || 'Set all item counts to 0? This will clear your entire inventory but keep items in the database.')) {
                 try {
                     const result = await api.clear_inventory();
                     if (result && result.success) {
-                        alert(i18n.t('inventoryCleared') || 'Inventory cleared! All item counts set to 0.');
+                        alert((window.tr ? window.tr('inventoryCleared') : null) || 'Inventory cleared! All item counts set to 0.');
                         loadInventory();
                         loadStats();
                     } else {
