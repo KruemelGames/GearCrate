@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+# Enable DPI-Awareness for correct coordinates with Windows scaling
+try:
+    import ctypes
+    ctypes.windll.shcore.SetProcessDpiAwareness(2)
+except:
+    print("[WARNING] Could not enable DPI-Awareness - coordinates may be incorrect with Windows scaling")
+
 import keyboard
 import time
 import os
@@ -118,9 +125,20 @@ def main():
             if keyboard.is_pressed('insert'):
                 break
             if keyboard.is_pressed('esc'):
-                log_print("\n[EXIT] ESC pressed - Exiting scanner...")
-                time.sleep(1)
-                return
+                # Only exit if scanner window is in focus (not Star Citizen)
+                try:
+                    hwnd = win32gui.GetForegroundWindow()
+                    window_title = win32gui.GetWindowText(hwnd)
+                    # Check if current window is NOT Star Citizen
+                    if "star citizen" not in window_title.lower():
+                        log_print("\n[EXIT] ESC pressed - Exiting scanner...")
+                        time.sleep(1)
+                        return
+                except:
+                    # If check fails, allow exit anyway
+                    log_print("\n[EXIT] ESC pressed - Exiting scanner...")
+                    time.sleep(1)
+                    return
             time.sleep(0.05)
 
         time.sleep(0.3)

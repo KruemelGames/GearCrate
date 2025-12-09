@@ -20,11 +20,11 @@ BORDER_OFFSET_TOP = 4
 BORDER_OFFSET_LEFT = 4
 
 TILE_WIDTH = 86
-TILE_HEIGHT = 86             # Tile height (added for clarity)
+TILE_HEIGHT = 86         # Tile height (added for clarity)
 TILE_SPACING = 10
 
 # NEW: Exact step size to next row
-ROW_STEP = 97                # 86px tile + 10px spacing + 1px correction = 97px
+ROW_STEP = 97            # 86px tile + 10px spacing + 1px correction = 97px
 
 # --- SCROLL PARAMETERS (FOR PIXEL-PRECISE DRAG-SCROLLING WITH COLOR DETECTION) ---
 # The defined area where the scrollbar is located
@@ -34,17 +34,17 @@ SCROLL_AREA_RIGHT = 1800
 SCROLL_AREA_BOTTOM = 1022
 
 # The colors of the scrollbar thumb
-SCROLLBAR_COLOR = (17, 103, 120)  # Übernommen von HEAD
-SCROLLBAR_COLOR_HOVER = (29, 160, 145)  # Übernommen von HEAD
-SCROLL_COLOR_TOLERANCE = 15      # Tolerance for color differences (important for reliability)
+SCROLLBAR_COLOR = (17, 103, 120)  
+SCROLLBAR_COLOR_HOVER = (29, 160, 145)  
+SCROLL_COLOR_TOLERANCE = 15     # Tolerance for color differences (important for reliability)
 
 # Fixed OCR region (tooltip at top center)
-OCR_LEFT    = 1095
-OCR_TOP     = 100
-OCR_RIGHT   = 1326
-OCR_BOTTOM  = 135
-OCR_WIDTH   = OCR_RIGHT - OCR_LEFT
-OCR_HEIGHT  = OCR_BOTTOM - OCR_TOP
+OCR_LEFT   = 1095
+OCR_TOP    = 100
+OCR_RIGHT  = 1326
+OCR_BOTTOM = 135
+OCR_WIDTH  = OCR_RIGHT - OCR_LEFT
+OCR_HEIGHT = OCR_BOTTOM - OCR_TOP
 
 MAX_COLUMNS = 4
 
@@ -57,7 +57,7 @@ SCROLL_PIXELS_UP = 322  # Reference: scroll distance for ~25 rows
 
 # Scrollbar geometry for dynamic calculation
 TRACK_HEIGHT = SCROLL_AREA_BOTTOM - SCROLL_AREA_TOP  # 802px
-VISIBLE_ROWS = 8      # Number of rows visible in viewport
+VISIBLE_ROWS = 8        # Number of rows visible in viewport
 ROWS_PER_BLOCK = 8      # Number of rows to scroll per block
 
 # Empirical correction factor (calibrated with 322px @ 25 rows)
