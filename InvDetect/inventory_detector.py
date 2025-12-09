@@ -274,10 +274,14 @@ class InventoryScanner:
         # Combine both masks (OR operation)
         matches = matches1 | matches2
 
-        # Find Y-coordinates of all matching pixels in middle X column
-        mid_x = (config.SCROLL_AREA_RIGHT - config.SCROLL_AREA_LEFT) // 2
-        matching_ys = np.where(matches[:, mid_x])[0]
-
+        # Suche in mehreren Spalten statt nur der Mitte (robuster gegen Verschiebung)
+        best_matches = []
+        for x in range(2, 8):  # Checke 6 Pixel-Spalten (60% der Scrollbar-Breite)
+            matching_ys = np.where(matches[:, x])[0]
+            if len(matching_ys) > len(best_matches):
+                best_matches = matching_ys
+        matching_ys = best_matches
+        
         found_y = -1
         found_y_bottom = -1
         scrollbar_height = 0
@@ -385,8 +389,13 @@ class InventoryScanner:
         matches2_after = np.all(color_diff2_after <= tolerance, axis=2)
         matches_after = matches1_after | matches2_after
 
-        mid_x = (config.SCROLL_AREA_RIGHT - config.SCROLL_AREA_LEFT) // 2
-        matching_ys_after = np.where(matches_after[:, mid_x])[0]
+        # Suche in mehreren Spalten (gleiche Methode wie oben)
+        best_matches_after = []
+        for x in range(2, 8):
+            matching_ys_after_temp = np.where(matches_after[:, x])[0]
+            if len(matching_ys_after_temp) > len(best_matches_after):
+                best_matches_after = matching_ys_after_temp
+        matching_ys_after = best_matches_after
 
         if len(matching_ys_after) > 0:
             # Find largest contiguous group
