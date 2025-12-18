@@ -14,7 +14,7 @@ A desktop tool designed for managing and tracking your collected armor, clothing
 
 ## Download
 
-Download the latest test version here: [https://github.com/KruemelGames/GearCrate/releases/](https://github.com/KruemelGames/GearCrate/releases/)
+Download the latest test version here: https://github.com/KruemelGames/GearCrate/releases/tag/Test
 
 ## Installation & Launch (Optimized Workflow)
 
@@ -26,7 +26,6 @@ For a complete installation of all dependencies and an automatic initial launch,
 
 1.  Ensure **Python** is already installed and accessible on your system.
 2.  Double-click to run **`setup.bat`**.
-3.  If that doesn't work make sure to rightclick and open as administrator
 
 > **Note:** The **`setup.bat`** script automatically installs all required Python libraries from the `requirements.txt` file, verifies the Python version, and launches the application upon successful completion.
 

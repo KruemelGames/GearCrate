@@ -43,7 +43,7 @@ echo [LOG] Setup started as Administrator >> "%LOGFILE%"
 echo [1/3] Checking Python installation...
 echo [1/3] Checking Python... >> "%LOGFILE%"
 
-python --version >nul 2>&1
+py --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [X] Python not found.
     echo [ERROR] Python not found >> "%LOGFILE%"
@@ -51,7 +51,7 @@ if %errorlevel% neq 0 (
 )
 
 :: Get Python version using temp file to avoid escaping issues
-python --version > "%TEMP%\pyver.txt" 2>&1
+py --version > "%TEMP%\pyver.txt" 2>&1
 set /p PYTHON_VERSION_LINE=<"%TEMP%\pyver.txt"
 del "%TEMP%\pyver.txt" 2>nul
 
@@ -141,16 +141,23 @@ del "%INSTALLER_PATH%" 2>nul
 echo [LOG] Python installed >> "%LOGFILE%"
 
 echo [OK] Python installed!
-echo [+] Updating environment...
-echo [LOG] Refreshing PATH from registry... >> "%LOGFILE%"
+echo [+] Verifying installation...
+echo [LOG] Verifying py.exe launcher... >> "%LOGFILE%"
 
-:: Refresh PATH from registry
-for /f "skip=2 tokens=3*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYSTEM_PATH=%%a %%b"
-for /f "skip=2 tokens=3*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USER_PATH=%%a %%b"
-set "PATH=%SYSTEM_PATH%;%USER_PATH%"
+py --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Python installation seems to have failed.
+    echo [ERROR] py.exe launcher not found after installation. >> "%LOGFILE%"
+    echo.
+    echo Please restart your PC and run setup.bat again.
+    echo If the problem persists, please install Python 3.11 manually.
+    pause
+    exit /b 1
+)
 
-echo [LOG] PATH updated from registry >> "%LOGFILE%"
-echo [OK] Environment updated!
+echo [OK] Python ready.
+echo [LOG] py.exe found and working. >> "%LOGFILE%"
 echo.
 goto :INSTALL_REQS
 
@@ -190,12 +197,12 @@ if not exist "%~dp0requirements.txt" (
 )
 
 echo [LOG] Upgrading pip... >> "%LOGFILE%"
-python -m pip install --upgrade pip --quiet
+py -m pip install --upgrade pip --quiet
 
 echo [LOG] Installing requirements.txt... >> "%LOGFILE%"
 echo This may take several minutes...
 echo.
-pip install -r requirements.txt
+py -m pip install -r requirements.txt
 
 if %errorlevel% neq 0 (
     echo.

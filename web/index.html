@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GearCrate - Star Citizen Inventory Manager</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles_panels.css">
 </head>
 <body>
     <div class="container">
@@ -12,7 +13,7 @@
         <header>
             <div class="header-content">
                 <div class="header-left">
-					<h1><img id="gear-logo" src="/img/GearCrate_Logo.png" alt="GearCrate Logo"> <span data-i18n="appTitle">GearCrate</span></h1>
+                    <h1><img id="gear-logo" src="/img/GearCrate_Logo.png" alt="GearCrate Logo"> <span data-i18n="appTitle">GearCrate</span></h1>
                     <p class="subtitle">Star Citizen Inventory Manager</p>
                 </div>
                 <div class="header-right">
@@ -36,91 +37,138 @@
             <button id="view-btn-import" class="view-btn">📥 Import from SC</button>
         </section>
 
-        <!-- MAIN CONTENT AREA (wird gewechselt) -->
-        <div id="main-content">
-            <!-- Inventar View -->
-            <div id="inventory-view" class="content-view active">
-                <!-- Search Section -->
-                <section class="search-section">
-                    <h2>🔍 <span data-i18n="search">Suche</span></h2>
-                    <div class="search-controls">
-                        <input type="text" id="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Suche Items...">
-                        <div class="search-limit-wrapper">
-                            <label data-i18n="searchLimit">Ergebnisse zeigen:</label>
-                            <select id="search-limit">
-                                <option value="10">10</option>
-                                <option value="25" selected>25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                                <option value="999" data-i18n="categoryAll">Alle</option>
-                            </select>
-                        </div>
+        <!-- ========== LINKES DROPDOWN PANEL - SUCHE ========== -->
+        <div class="panel-left-wrapper" id="panelLeftWrapper">
+            <div class="panel-left compact" id="panelLeft">
+                <div class="search-container">
+                    <!-- Sucheingabe -->
+                    <input type="text" class="search-input" id="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Suche Items..." autocomplete="off">
+
+                    <!-- Search Limit Dropdown -->
+                    <div class="search-limit-wrapper">
+                        <label data-i18n="searchLimit">Ergebnisse zeigen:</label>
+                        <select id="search-limit" class="search-limit-select">
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="999" data-i18n="categoryAll">Alle</option>
+                        </select>
                     </div>
-                    <div id="search-results" class="search-results hidden"></div>
+
+                    <!-- "Show results:" Label UNTER dem Search Limit -->
+                    <div class="search-results-label" id="searchResultsLabel" style="display: none;">
+                        <span data-i18n="showResults">Show results:</span> <strong id="searchResultsCount">0</strong>
+                    </div>
+
+                    <!-- Suchergebnisse Liste (max 12 Items) -->
+                    <div class="search-list" id="search-results"></div>
+
+                    <!-- Item Preview (bleibt gleich) -->
                     <div id="item-preview" class="item-preview hidden">
                         <h3 id="preview-name"></h3>
                         <p id="preview-type"></p>
                         <img id="preview-image" src="" alt="Preview">
                         <button id="add-button" data-i18n="add">Hinzufügen</button>
                     </div>
-                </section>
+                </div>
+            </div>
+            <div class="tab-left" id="tabLeft">
+                <svg viewBox="0 0 55 85" preserveAspectRatio="none">
+                    <path class="tab-bg" d="
+                        M 0 0
+                        L 42 8
+                        Q 55 10 55 22
+                        L 55 63
+                        Q 55 75 42 77
+                        L 0 85
+                        Z
+                    "/>
+                    <path class="tab-border" d="
+                        M 0 0
+                        L 42 8
+                        Q 55 10 55 22
+                        L 55 63
+                        Q 55 75 42 77
+                        L 0 85
+                    "/>
+                </svg>
+                <span class="tab-icon">🔍</span>
+            </div>
+        </div>
 
-                <!-- Inventory Section -->
-                <section class="inventory-section">
-            <div class="inventory-header">
-                <!-- H2 ENTFERNT -->
-                
-                <!-- NEW: Button-based Controls -->
-                <div class="inventory-controls-wrapper">
-                    <!-- Left: Sortierung -->
-                    <div class="control-section">
-                        <h3 class="control-title">🔀 <span data-i18n="sortBy">Sortieren nach:</span></h3>
-                        <div class="button-group">
-                            <button class="sort-btn active" data-sort="name">
-                                📝 <span data-i18n="sortName">Name</span>
-                            </button>
-                            <button class="sort-btn" data-sort="count">
-                                🔢 <span data-i18n="sortCount">Anzahl</span>
-                            </button>
-                            <button class="sort-btn" data-sort="date">
-                                📅 <span data-i18n="sortDate">Datum</span>
-                            </button>
-                        </div>
-                        <button id="sort-order-btn" class="order-btn" data-i18n="sortAscending">
-                            ⬇️ Aufsteigend
+        <!-- ========== RECHTES DROPDOWN PANEL - FILTER ========== -->
+        <div class="panel-right-wrapper" id="panelRightWrapper">
+            <div class="panel-right" id="panelRight">
+                <div class="filter-container">
+                    <!-- Filter-Eingabe -->
+                    <input type="text" class="filter-input" id="filter-input" data-i18n-placeholder="inventoryFilter" placeholder="Inventar filtern..." autocomplete="off">
+
+                    <!-- Sort Buttons 2x2 Grid -->
+                    <div class="sort-grid">
+                        <button class="sort-btn active" data-sort="name" id="sort-name">
+                            <span data-i18n="sortName">Name</span>
                         </button>
+                        <button class="sort-btn" data-sort="count" id="sort-count">
+                            <span data-i18n="sortCount">Count</span>
+                        </button>
+                        <button class="sort-btn" data-sort="date" id="sort-date">
+                            <span data-i18n="sortDate">Date</span>
+                        </button>
+                        <button class="order-btn" id="sort-order-btn" title="Sort Order">🔼</button>
                     </div>
-                    
-                    <!-- Right: Kategorien -->
-                    <div class="control-section">
-                        <h3 class="control-title">🏷️ Kategorien</h3>
-                        <div id="category-buttons" class="category-grid">
-                            <!-- Buttons werden dynamisch geladen -->
-                            <div style="color: #666; padding: 10px;" data-i18n="categoryLoading">Kategorien werden geladen...</div>
-                        </div>
+
+                    <!-- Abstand -->
+                    <div class="filter-separator"></div>
+
+                    <!-- Kategorie Buttons mit Icons -->
+                    <div class="category-grid-panel" id="category-buttons-panel">
+                        <!-- Buttons werden dynamisch geladen -->
+                        <div style="color: #666; padding: 10px; font-size: 11px;" data-i18n="categoryLoading">Loading...</div>
                     </div>
                 </div>
-                
-                <!-- Text Filter -->
-                <div class="text-filter">
-                    <input type="text" id="filter-input" data-i18n-placeholder="inventoryFilter" placeholder="Inventar filtern...">
-                </div>
             </div>
-            
-            <div id="inventory-grid" class="inventory-grid">
-                <p style="text-align: center; color: #888;" data-i18n="inventoryEmpty">Lade Inventar...</p>
+            <div class="tab-right" id="tabRight">
+                <svg viewBox="0 0 55 85" preserveAspectRatio="none">
+                    <path class="tab-bg" d="
+                        M 55 0
+                        L 13 8
+                        Q 0 10 0 22
+                        L 0 63
+                        Q 0 75 13 77
+                        L 55 85
+                        Z
+                    "/>
+                    <path class="tab-border" d="
+                        M 55 0
+                        L 13 8
+                        Q 0 10 0 22
+                        L 0 63
+                        Q 0 75 13 77
+                        L 55 85
+                    "/>
+                </svg>
+                <span class="tab-icon">☰</span>
             </div>
-        </section>
+        </div>
+
+        <!-- ========== MAIN CONTENT AREA ========== -->
+        <div id="main-content">
+            <!-- Inventar View -->
+            <div id="inventory-view" class="content-view active">
+                <!-- Inventory Grid (bleibt identisch) -->
+                <section class="inventory-section">
+                    <div id="inventory-grid" class="inventory-grid">
+                        <p style="text-align: center; color: #888;" data-i18n="inventoryEmpty">Lade Inventar...</p>
+                    </div>
+                </section>
             </div>
-            <!-- Ende Inventar View -->
 
             <!-- Gear Sets View -->
             <div id="gearsets-view" class="content-view">
                 <section class="gearsets-section">
                     <!-- Sticky Header -->
                     <div class="gearsets-header">
-                        <!-- H2 ENTFERNT -->
-                        
                         <!-- Set Selector Buttons -->
                         <div class="gearsets-selector">
                             <h3 class="control-title">🎯 Set auswählen:</h3>
@@ -130,7 +178,7 @@
                                 <button class="set-btn set-btn-all" data-set="ALL">🌐 Alle Sets</button>
                             </div>
                         </div>
-                        
+
                         <!-- Filter Buttons -->
                         <div class="gearsets-filter">
                             <button class="filter-btn active" data-filter="all">Alle</button>
@@ -141,14 +189,13 @@
                             <button class="filter-btn" data-filter="all-parts">🟢 ALL (4/4)</button>
                         </div>
                     </div>
-                    
+
                     <!-- Gear Sets Grid (scrollbar) -->
                     <div id="gearsets-grid" class="gearsets-grid">
                         <p style="text-align: center; color: #888;">Lade Gear Sets...</p>
                     </div>
                 </section>
             </div>
-            <!-- Ende Gear Sets View -->
 
             <!-- Import from SC View -->
             <div id="import-view" class="content-view">
@@ -179,6 +226,19 @@
                                     <div class="mode-title" data-i18n="importMode2Title">1x2 Items</div>
                                     <div class="mode-description" data-i18n="importMode2Desc">Undersuits</div>
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Selection -->
+                        <div class="resolution-selection" style="margin-top: 20px;">
+                            <h3 data-i18n="importSelectResolution">🖥️ Auflösung wählen:</h3>
+                            <div class="resolution-buttons">
+                                <select id="resolution-select" class="resolution-select-dropdown">
+                                    <option value="1920x1080" selected>1920x1080 (Full HD)</option>
+                                    <option value="2560x1440">2560x1440 (QHD)</option>
+                                    <option value="3840x2160">3840x2160 (4K UHD)</option>
+                                    <option value="1280x720">1280x720 (HD)</option>
+                                </select>
                             </div>
                         </div>
 
@@ -265,36 +325,34 @@
                     </div>
                 </section>
             </div>
-            <!-- Ende Import View -->
         </div>
-        <!-- Ende Main Content -->
-
-        <!-- Stats Section -->
-        <section class="stats-section">
-            <h2>📊 <span data-i18n="statsTitle">Statistiken</span></h2>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label" data-i18n="statsTotalInDb">Items in Datenbank:</span>
-                    <span class="stat-value" id="total-items-db">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label" data-i18n="statsInInventory">Items im Inventar:</span>
-                    <span class="stat-value" id="inventory-unique-items">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label" data-i18n="statsTotalCount">Gesamtanzahl:</span>
-                    <span class="stat-value" id="total-count">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label" data-i18n="statsCacheSize">Cache-Größe:</span>
-                    <span class="stat-value" id="cache-size">0 MB</span>
-                </div>
-            </div>
-            
-            <!-- Kategorie-Statistiken (dynamisch) -->
-            <div id="category-stats" class="category-stats"></div>
-        </section>
     </div>
+
+    <!-- Stats Section - versteckt (jetzt im linken unteren Panel) -->
+    <section class="stats-section" style="display: none;">
+        <h2>📊 <span data-i18n="statsTitle">Statistiken</span></h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-label" data-i18n="statsTotalInDb">Items in Datenbank:</span>
+                <span class="stat-value" id="total-items-db">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label" data-i18n="statsInInventory">Items im Inventar:</span>
+                <span class="stat-value" id="inventory-unique-items">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label" data-i18n="statsTotalCount">Gesamtanzahl:</span>
+                <span class="stat-value" id="total-count">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label" data-i18n="statsCacheSize">Cache-Größe:</span>
+                <span class="stat-value" id="cache-size">0 MB</span>
+            </div>
+        </div>
+
+        <!-- Kategorie-Statistiken (dynamisch) -->
+        <div id="category-stats" class="category-stats"></div>
+    </section>
 
     <!-- Item Detail Modal -->
     <div id="item-modal" class="modal hidden">
@@ -320,34 +378,114 @@
         </div>
     </div>
 
+    <!-- ========== POPUP LINKS UNTEN - STATISTIK ========== -->
+    <div class="panel-bottom-left-wrapper" id="popupStatsWrapper">
+        <div class="panel-bottom-left" id="popupStats">
+            <div class="popup-stats-content">
+                <h3>📊 <span data-i18n="statsTitle">Statistiken</span></h3>
+                <div class="stat-item">
+                    <span class="stat-label" data-i18n="statsTotalInDb">Items in Datenbank:</span>
+                    <span class="stat-value" id="popup-total-items-db">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label" data-i18n="statsInInventory">Items im Inventar:</span>
+                    <span class="stat-value" id="popup-inventory-unique-items">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label" data-i18n="statsTotalCount">Gesamtanzahl:</span>
+                    <span class="stat-value" id="popup-total-count">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label" data-i18n="statsCacheSize">Cache-Größe:</span>
+                    <span class="stat-value" id="popup-cache-size">0 MB</span>
+                </div>
+
+                <!-- Kategorie-Statistiken (dynamisch) -->
+                <div id="popup-category-stats" class="category-stats"></div>
+            </div>
+        </div>
+        <div class="tab-bottom-left" id="tabStatsToggle">
+            <svg viewBox="0 0 55 85" preserveAspectRatio="none">
+                <path class="tab-bg" d="
+                    M 0 0
+                    L 42 8
+                    Q 55 10 55 22
+                    L 55 63
+                    Q 55 75 42 77
+                    L 0 85
+                    Z
+                "/>
+                <path class="tab-border" d="
+                    M 0 0
+                    L 42 8
+                    Q 55 10 55 22
+                    L 55 63
+                    Q 55 75 42 77
+                    L 0 85
+                "/>
+            </svg>
+            <span class="tab-icon">📊</span>
+        </div>
+    </div>
+
+    <!-- ========== POPUP RECHTS UNTEN - EINSTELLUNGEN ========== -->
+    <div class="panel-bottom-right-wrapper" id="popupSettingsWrapper">
+        <div class="panel-bottom-right" id="popupSettings">
+            <div class="popup-settings-content">
+                <h3>⚙️ <span data-i18n="settingsTitle">Einstellungen</span></h3>
+                <button id="clear-cache-btn" class="settings-btn" data-i18n="footerClearCache" title="Clear website cache and reload">
+                    🗑️ Cache leeren
+                </button>
+                <button id="debug-btn" class="settings-btn" data-i18n="footerDebug" title="Open DevTools">
+                    🐛 Debug
+                </button>
+                <button id="clear-inventory-btn" class="settings-btn" data-i18n="footerClearInventory" title="Set all item counts to 0">
+                    📦 Inventar leeren
+                </button>
+            </div>
+        </div>
+        <div class="tab-bottom-right" id="tabSettingsToggle">
+            <svg viewBox="0 0 55 85" preserveAspectRatio="none">
+                <path class="tab-bg" d="
+                    M 55 0
+                    L 13 8
+                    Q 0 10 0 22
+                    L 0 63
+                    Q 0 75 13 77
+                    L 55 85
+                    Z
+                "/>
+                <path class="tab-border" d="
+                    M 55 0
+                    L 13 8
+                    Q 0 10 0 22
+                    L 0 63
+                    Q 0 75 13 77
+                    L 55 85
+                "/>
+            </svg>
+            <span class="tab-icon">⚙️</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <!-- Translation Scripts (LOAD FIRST!) -->
     <script src="translations/german-translation.js"></script>
     <script src="translations/english-translation.js"></script>
     <script src="translations/french-translation.js"></script>
     <script src="translations/spanish-translation.js"></script>
     <script src="translations/translations.js"></script>
-    
+
     <!-- Fuse.js for smart search -->
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
-    
-    <!-- Footer with utility buttons -->
-    <footer class="app-footer">
-        <div class="footer-buttons">
-            <button id="clear-cache-btn" class="footer-btn" data-i18n="footerClearCache" title="Clear website cache and reload">
-                🗑️ Clear Cache
-            </button>
-            <button id="debug-btn" class="footer-btn" data-i18n="footerDebug" title="Open DevTools">
-                🐛 Debug
-            </button>
-            <button id="clear-inventory-btn" class="footer-btn" data-i18n="footerClearInventory" title="Set all item counts to 0">
-                📦 Clear Inventory
-            </button>
-        </div>
-    </footer>
 
     <!-- App Scripts -->
     <script src="api-adapter.js"></script>
+    <script src="panel-manager.js"></script>
+    <script src="panels.js"></script>
+    <script src="bottom-popups.js"></script>
     <script src="app.js"></script>
+    <script src="app_panels.js"></script>
     <script src="i18n-integration.js"></script>
 </body>
 </html>

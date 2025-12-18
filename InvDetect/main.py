@@ -109,11 +109,21 @@ def main():
     log_print("\n=== InvDetect - Star Citizen Universal Inventory Scanner ===")
     log_print("INSERT → Start Scan | DELETE → Stop | ESC → Exit\n")
 
-    # Get scan mode from command line argument (passed by GearCrate)
+    # Get scan mode and resolution from command line arguments
     import sys
     scan_mode = int(sys.argv[1]) if len(sys.argv) > 1 else 1  # Default to 1 (1x1) if not provided
+    resolution_str = sys.argv[2] if len(sys.argv) > 2 else "1920x1080" # Default resolution
+    
+    # Initialize geometry based on resolution
+    try:
+        width, height = map(int, resolution_str.split('x'))
+        config.initialize_geometry(width, height)
+        log_print(f"\n[INFO] Initialized for resolution: {width}x{height}")
+    except ValueError:
+        log_print(f"\n[WARNING] Invalid resolution format '{resolution_str}'. Falling back to 1920x1080.")
+        config.initialize_geometry(1920, 1080)
+        
     mode_name = "1x2 (Undersuits)" if scan_mode == 2 else "1x1 (Normal)"
-
     log_print(f"\n[INFO] Scan mode: {mode_name}")
 
     # Main loop - allows multiple scans

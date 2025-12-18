@@ -4,7 +4,9 @@ API Backend for frontend communication
 import os
 import sys
 import json
+import sqlite3
 import tempfile
+import requests
 from urllib.parse import urlparse, parse_qs
 
 # Add src to path if not already there
@@ -18,6 +20,11 @@ from database.operations import ItemOperations
 from scraper.cstone import CStoneScraper
 from cache.image_cache import ImageCache
 from cache.gear_sets import GearSetsManager
+from utils.logger import setup_logger
+from utils.exceptions import DatabaseError, ConfigError, CacheError, ScraperError
+
+# Setup logger
+logger = setup_logger(__name__)
 #
 
 class API:
@@ -32,18 +39,20 @@ class API:
         self.scraper = CStoneScraper()
         self.cache = ImageCache()
         self.gear_sets = GearSetsManager()
+        self.current_scan_mode = 1  # Default to 1x1
+        self.current_scan_resolution = "1920x1080" # Default resolution
 
     @classmethod
     def set_webview_window(cls, window):
         """Store reference to webview window for DevTools access"""
         cls._webview_window = window
-        print("✅ Webview window reference stored")
+        logger.info("Webview window reference stored", extra={'emoji': '✅'})
 
     def open_devtools(self):
         """Open DevTools in the webview window (can be called as instance or class method)"""
         # Use class variable to access window
         if API._webview_window is None:
-            print("⚠️ No webview window reference available")
+            logger.warning("No webview window reference available", extra={'emoji': '⚠️'})
             return {'success': False, 'error': 'No webview window available'}
 
         try:
@@ -55,9 +64,9 @@ class API:
                     window.chrome.webview.hostObjects.sync.open_devtools();
                 }
             ''')
-            print("✅ DevTools opened via JS")
+            logger.info("DevTools opened via JS", extra={'emoji': '✅'})
             return {'success': True}
-        except Exception as e:
+        except (AttributeError, RuntimeError) as e:
             # Fallback: Try F12 keypress
             try:
                 import pyautogui
@@ -67,11 +76,29 @@ class API:
                 time.sleep(0.1)
                 pyautogui.press('f12')
                 API._webview_window.on_top = False
-                print("✅ DevTools opened (F12 pressed)")
+                logger.info("DevTools opened (F12 pressed)", extra={'emoji': '✅'})
                 return {'success': True}
-            except Exception as e2:
-                print(f"⚠️ Could not open DevTools: {e}, {e2}")
+            except (ImportError, AttributeError, RuntimeError) as e2:
+                logger.warning(f"Could not open DevTools: {e}, {e2}", extra={'emoji': '⚠️'})
                 return {'success': False, 'error': str(e)}
+
+    def set_scan_resolution(self, resolution):
+        """
+        Sets the scan resolution for InvDetect scanner
+        resolution: '1920x1080', '2560x1440', etc.
+        """
+        try:
+            # Basic validation
+            if 'x' not in resolution:
+                return {'success': False, 'error': f'Invalid resolution format: {resolution}'}
+            
+            self.current_scan_resolution = resolution
+            logger.info(f"Scan resolution set to: {resolution}", extra={'emoji': '✅'})
+            return {'success': True, 'resolution': resolution}
+        except (AttributeError, ValueError) as e:
+            logger.error(f"Error setting scan resolution: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': str(e)}
+
 
     def _path_to_url(self, path):
         """
@@ -161,7 +188,7 @@ class API:
 
         # 1. Details und Properties scrapen, wenn URL fehlt
         if not image_url:
-            print(f"INFO: No image_url provided for {name}, attempting to scrape full details...")
+            logger.info(f"No image_url provided for {name}, attempting to scrape full details...", extra={'emoji': 'ℹ️'})
             full_details = self.scraper.get_item_details(name)
             if full_details:
                 image_url = full_details.get('image_url')
@@ -195,20 +222,27 @@ class API:
                         # Clean up temp file
                         try:
                             os_lib.remove(tmp_path)
-                        except:
-                            pass
-                except Exception as e:
-                    print(f"Error downloading image for {name}: {e}")
+                        except (OSError, PermissionError):
+                            pass  # Temp file cleanup is not critical
+                except requests.RequestException as e:
+                    logger.error(f"Network error downloading image for {name}: {e}", extra={'emoji': '❌'})
+                except (IOError, OSError) as e:
+                    logger.error(f"File error saving image for {name}: {e}", extra={'emoji': '❌'})
 
         # 3. In DB speichern (ohne properties_json wenn die Spalte nicht existiert)
         try:
             result = self.operations.add_item(name, item_type, image_url, image_path, notes, initial_count, properties_json)
-        except Exception as e:
+        except sqlite3.OperationalError as e:
             # Falls properties_json Spalte nicht existiert, versuche ohne
             if 'properties_json' in str(e):
+                logger.warning(f"properties_json column not found, retrying without it", extra={'emoji': '⚠️'})
                 result = self.operations.add_item(name, item_type, image_url, image_path, notes, initial_count)
             else:
-                raise e
+                logger.error(f"Database operation error: {e}", extra={'emoji': '❌'})
+                raise DatabaseError(f"Failed to add item: {e}") from e
+        except sqlite3.IntegrityError as e:
+            logger.error(f"Item '{name}' already exists", extra={'emoji': '❌'})
+            raise DatabaseError(f"Item already exists: {name}") from e
 
         return result
 
@@ -360,8 +394,9 @@ class API:
 
         try:
             processed_items.sort(key=sort_key, reverse=reverse_sort)
-        except Exception:
+        except (TypeError, KeyError, AttributeError):
             # Fallback auf Name, falls Sortierung fehlschlägt
+            logger.warning(f"Sort failed on column '{sort_by}', falling back to name sort", extra={'emoji': '⚠️'})
             processed_items.sort(key=lambda x: x.get('name', '').lower(), reverse=reverse_sort)
             
         return processed_items
@@ -376,9 +411,10 @@ class API:
                 status_val = 1 if is_favorite.lower() in ('1', 'true', 'yes') else 0
             else:
                 status_val = 1 if is_favorite else 0
-                
+
             return self.operations.toggle_favorite_status(name, status_val)
-        except Exception as e:
+        except sqlite3.Error as e:
+            logger.error(f"Database error toggling favorite for '{name}': {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}
 
     # =========================================================
@@ -393,7 +429,8 @@ class API:
         try:
             summary = self.gear_sets.get_all_sets_summary(self.db.conn)
             return {'success': True, 'sets': summary}
-        except Exception as e:
+        except sqlite3.Error as e:
+            logger.error(f"Database error getting gear sets: {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}
 
     def get_gear_set_details(self, set_name, variant=''):
@@ -453,10 +490,11 @@ class API:
             result['owned_count'] = owned_count
             result['total_count'] = 4
             result['completion'] = f"{owned_count}/4"
-            
+
             return {'success': True, 'set': result}
-            
-        except Exception as e:
+
+        except sqlite3.Error as e:
+            logger.error(f"Database error getting gear set details for '{set_name}': {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}
 
     def get_gear_set_variants(self, set_name):
@@ -466,7 +504,8 @@ class API:
         try:
             variants = self.gear_sets.get_set_variants(self.db.conn, set_name)
             return {'success': True, 'variants': variants}
-        except Exception as e:
+        except sqlite3.Error as e:
+            logger.error(f"Database error getting gear set variants for '{set_name}': {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}
 
     # =========================================================
@@ -482,11 +521,12 @@ class API:
         try:
             items = self.scraper.get_category_items(category_url)
             return items
-        except Exception as e:
-            print(f"Error in get_category_items: {e}")
-            import traceback
-            traceback.print_exc()
-            raise e
+        except requests.RequestException as e:
+            logger.error(f"Network error in get_category_items: {e}", extra={'emoji': '❌'})
+            raise ScraperError(f"Failed to fetch category items: {e}") from e
+        except (ValueError, KeyError) as e:
+            logger.error(f"Parse error in get_category_items: {e}", extra={'emoji': '❌'})
+            raise ScraperError(f"Failed to parse category items: {e}") from e
 
     # =========================================================
     # SCANNER FUNKTIONEN (InvDetect Integration)
@@ -506,9 +546,10 @@ class API:
             else:
                 return {'success': False, 'error': f'Invalid scan mode: {mode}'}
 
-            print(f"✅ Scan mode set to: {mode} (mode {self.current_scan_mode})")
+            logger.info(f"Scan mode set to: {mode} (mode {self.current_scan_mode})", extra={'emoji': '✅'})
             return {'success': True, 'mode': mode}
-        except Exception as e:
+        except (AttributeError, ValueError) as e:
+            logger.error(f"Error setting scan mode: {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}
 
     def start_scanner(self):
@@ -534,37 +575,40 @@ class API:
             try:
                 with open(detected_items_file, 'w', encoding='utf-8') as f:
                     f.write('# Detected Items\n# Format: count, item_name\n\n')
-                print('✅ Cleared detected_items.txt')
-            except Exception as e:
-                print(f'⚠️ Could not clear detected_items.txt: {e}')
+                logger.info('Cleared detected_items.txt', extra={'emoji': '✅'})
+            except (IOError, OSError, PermissionError) as e:
+                logger.warning(f'Could not clear detected_items.txt: {e}', extra={'emoji': '⚠️'})
 
             # Clear not_detected.md
             try:
                 with open(not_detected_file, 'w', encoding='utf-8') as f:
                     f.write('# Not Detected Items\n# Format: Item Name - Page X, Row Y, Col Z\n\n')
-                print('✅ Cleared not_detected.md')
-            except Exception as e:
-                print(f'⚠️ Could not clear not_detected.md: {e}')
+                logger.info('Cleared not_detected.md', extra={'emoji': '✅'})
+            except (IOError, OSError, PermissionError) as e:
+                logger.warning(f'Could not clear not_detected.md: {e}', extra={'emoji': '⚠️'})
 
             # Get current scan mode (default to 1 if not set)
             scan_mode = getattr(self, 'current_scan_mode', 1)
+            scan_resolution = getattr(self, 'current_scan_resolution', "1920x1080")
 
-            # Start scanner in new console window with scan mode as argument
+            # Start scanner in new console window with scan mode and resolution as arguments
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
             # Run scanner with scan mode as command line argument
             subprocess.Popen(
-                [sys.executable, scanner_script, str(scan_mode)],
+                [sys.executable, scanner_script, str(scan_mode), scan_resolution],
                 cwd=invdetect_path,
                 creationflags=subprocess.CREATE_NEW_CONSOLE
             )
 
-            print(f"✅ Scanner started in new console with mode {scan_mode}")
+            logger.info(f"Scanner started in new console with mode {scan_mode} and resolution {scan_resolution}", extra={'emoji': '✅'})
             return {'success': True}
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        except FileNotFoundError as e:
+            logger.error(f"Scanner script not found: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': f'Scanner script not found: {e}'}
+        except (OSError, PermissionError) as e:
+            logger.error(f"Error starting scanner process: {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}
 
     def get_scan_results(self):
@@ -607,11 +651,11 @@ class API:
                                         if item_details.get('image_path'):
                                             # Item has local image cached
                                             image_url = self._path_to_url(item_details['image_path'])
-                                            print(f"[DEBUG] Item: {name}, Type: {item_type}, Using cached image: {image_url}")
+                                            logger.debug(f"Item: {name}, Type: {item_type}, Using cached image: {image_url}", extra={'emoji': '🔍'})
                                         else:
                                             # No local image, use placeholder based on item_type
                                             image_url = f'/images/Placeholder/{item_type}.png'
-                                            print(f"[DEBUG] Item: {name}, Type: {item_type}, Using placeholder: {image_url}")
+                                            logger.debug(f"Item: {name}, Type: {item_type}, Using placeholder: {image_url}", extra={'emoji': '🔍'})
 
                                         found_items.append({
                                             'name': name,
@@ -653,9 +697,11 @@ class API:
                 'found': found_items,
                 'not_found': not_found_items
             }
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        except (IOError, OSError, PermissionError) as e:
+            logger.error(f"File access error reading scan results: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': str(e)}
+        except sqlite3.Error as e:
+            logger.error(f"Database error reading scan results: {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}
 
     def import_scanned_items(self, items):
@@ -676,7 +722,6 @@ class API:
 
                 # Clean up name: strip whitespace and normalize multiple spaces
                 name = ' '.join(name.strip().split())
-
 
                 try:
                     # Try to get item from database
@@ -713,13 +758,16 @@ class API:
                             )
                             results.append({'success': True, 'name': name, 'action': 'added', 'count': count, 'warning': 'No details found'})
 
-                except Exception as item_error:
+                except sqlite3.Error as item_error:
+                    logger.error(f"Database error importing item '{name}': {item_error}", extra={'emoji': '❌'})
+                    results.append({'success': False, 'name': name, 'error': str(item_error)})
+                except requests.RequestException as item_error:
+                    logger.error(f"Network error scraping details for '{name}': {item_error}", extra={'emoji': '❌'})
                     results.append({'success': False, 'name': name, 'error': str(item_error)})
 
             return {'success': True, 'results': results}
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        except (ValueError, TypeError) as e:
+            logger.error(f"Invalid data in import_scanned_items: {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}
 
     # =========================================================
@@ -737,8 +785,11 @@ class API:
                     config = json.load(f)
                     return {'success': True, 'language': config.get('language')}
             return {'success': True, 'language': None}
-        except Exception as e:
-            print(f"Error reading user config: {e}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in config file: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': f"Invalid config file format: {e}"}
+        except (IOError, OSError, PermissionError) as e:
+            logger.error(f"File access error reading user config: {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}
 
     def set_user_language(self, language):
@@ -763,8 +814,148 @@ class API:
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(config, f, indent=2)
 
-            print(f"✅ User language saved: {language}")
+            logger.info(f"User language saved: {language}", extra={'emoji': '✅'})
             return {'success': True, 'language': language}
-        except Exception as e:
-            print(f"Error saving user config: {e}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in existing config file: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': f"Invalid config file format: {e}"}
+        except (IOError, OSError, PermissionError) as e:
+            logger.error(f"File access error saving user config: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': str(e)}
+
+    def _load_config(self):
+        """Helper to load config safely."""
+        config = {}
+        if os.path.exists(self.config_file):
+            try:
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+            except json.JSONDecodeError as e:
+                logger.warning(f"Error decoding JSON in config file: {self.config_file}. Starting with empty config. Error: {e}", extra={'emoji': '⚠️'})
+        return config
+
+    def _save_config(self, config):
+        """Helper to save config safely."""
+        os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
+        with open(self.config_file, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2)
+
+    def get_window_geometry(self):
+        """
+        Get saved window geometry from config file
+        Returns: {'width': int, 'height': int, 'x': int, 'y': int, 'maximized': bool}
+        """
+        try:
+            config = self._load_config()
+            window = config.get('window', {})
+            return {
+                'success': True,
+                'width': window.get('width'),
+                'height': window.get('height'),
+                'x': window.get('x'),
+                'y': window.get('y'),
+                'maximized': window.get('maximized', False)
+            }
+        except (IOError, OSError, PermissionError) as e:
+            logger.error(f"File access error reading window geometry: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': str(e)}
+
+    def save_window_geometry(self, geometry_data):
+        """
+        Save window geometry to config file
+        geometry_data: dict with keys 'width', 'height', 'x', 'y', 'maximized'
+        """
+        try:
+            config = self._load_config()
+
+            if 'window' not in config:
+                config['window'] = {}
+
+            # Only update values that were passed (not None)
+            config['window'].update({k: v for k, v in geometry_data.items() if v is not None})
+
+            # Ensure 'maximized' is present
+            if 'maximized' not in config['window']:
+                config['window']['maximized'] = False
+
+            self._save_config(config)
+
+            logger.info(f"Window geometry saved: {geometry_data}", extra={'emoji': '✅'})
+            return {'success': True}
+        except (IOError, OSError, PermissionError) as e:
+            logger.error(f"File access error saving window geometry: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': str(e)}
+
+    def set_window_geometry(self, width=None, height=None, x=None, y=None, maximized=False):
+        """
+        Save window geometry to config file (backward compatibility)
+        Calls save_window_geometry internally
+        """
+        geometry_data = {
+            'width': width,
+            'height': height,
+            'x': x,
+            'y': y,
+            'maximized': maximized
+        }
+        return self.save_window_geometry(geometry_data)
+
+    # =========================================================
+    # CACHE MANAGEMENT FUNKTIONEN
+    # =========================================================
+
+    def get_cache_stats(self):
+        """
+        Get cache statistics (size, file count)
+        Returns: {'size_bytes': int, 'size_mb': float, 'file_count': int}
+        """
+        try:
+            stats = self.cache.get_cache_stats()
+            return {'success': True, 'stats': stats}
+        except (IOError, OSError, PermissionError) as e:
+            logger.error(f"Error getting cache stats: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': str(e)}
+
+    def cleanup_cache_orphaned(self):
+        """
+        Remove orphaned images (not referenced in database)
+        Returns: {'removed_count': int, 'freed_mb': float, 'errors': list}
+        """
+        try:
+            result = self.cache.cleanup_orphaned_images(self.db.conn)
+            logger.info(f"Cleaned up {result['removed_count']} orphaned images, freed {result['freed_mb']} MB", extra={'emoji': '✅'})
+            return {'success': True, 'result': result}
+        except (IOError, OSError, PermissionError) as e:
+            logger.error(f"Error cleaning up orphaned images: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': str(e)}
+        except sqlite3.Error as e:
+            logger.error(f"Database error during orphaned cleanup: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': str(e)}
+
+    def cleanup_cache_old(self, max_age_days=30):
+        """
+        Remove images older than max_age_days
+        max_age_days: Maximum age in days (default: 30)
+        Returns: {'removed_count': int, 'freed_mb': float, 'errors': list}
+        """
+        try:
+            result = self.cache.cleanup_old_images(max_age_days)
+            logger.info(f"Cleaned up {result['removed_count']} old images (>{max_age_days} days), freed {result['freed_mb']} MB", extra={'emoji': '✅'})
+            return {'success': True, 'result': result}
+        except (IOError, OSError, PermissionError) as e:
+            logger.error(f"Error cleaning up old images: {e}", extra={'emoji': '❌'})
+            return {'success': False, 'error': str(e)}
+
+    def cleanup_cache_by_size(self, max_size_mb=1000):
+        """
+        Remove least recently used images until cache is under max_size_mb
+        max_size_mb: Maximum cache size in MB (default: 1000)
+        Returns: {'removed_count': int, 'freed_mb': float, 'errors': list}
+        """
+        try:
+            result = self.cache.cleanup_by_size(max_size_mb)
+            logger.info(f"Cleaned up cache to max {max_size_mb} MB: removed {result['removed_count']} images, freed {result['freed_mb']} MB", extra={'emoji': '✅'})
+            return {'success': True, 'result': result}
+        except (IOError, OSError, PermissionError) as e:
+            logger.error(f"Error cleaning up cache by size: {e}", extra={'emoji': '❌'})
             return {'success': False, 'error': str(e)}

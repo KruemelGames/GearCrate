@@ -616,6 +616,7 @@ function createGearSetCard(setData) {
             };
             img.src = getItemIcon(tempItem, 'medium');
             img.alt = partType;
+            img.loading = 'lazy'; // Lazy loading für bessere Performance
             img.onerror = function() {
                 // Fallback zu Placeholder wenn Bild nicht lädt
                 const placeholderUrl = getItemIcon({item_type: piece.item_type || partType}, 'medium');
@@ -684,13 +685,15 @@ function applySavedSettingsToUI() {
         }
     });
 
-    // Sortierreihenfolge-Button
+    // Sortierreihenfolge-Button (nur Emoji, kein Text)
     const sortOrderBtn = document.getElementById('sort-order-btn');
     if (sortOrderBtn) {
         if (currentSortOrder === 'asc') {
-            sortOrderBtn.textContent = '⬇️ ' + tr('sortAscending').replace('⬇️ ', '');
+            sortOrderBtn.textContent = '🔼';
+            sortOrderBtn.title = tr('sortAscending');
         } else {
-            sortOrderBtn.textContent = '⬆️ ' + tr('sortDescending').replace('⬆️ ', '');
+            sortOrderBtn.textContent = '🔽';
+            sortOrderBtn.title = tr('sortDescending');
         }
     }
 }
@@ -780,16 +783,18 @@ function setupEventListeners() {
         });
     });
 
-    // Sort order toggle button
+    // Sort order toggle button (nur Emoji, kein Text)
     const sortOrderBtn = document.getElementById('sort-order-btn');
     if (sortOrderBtn) {
         sortOrderBtn.addEventListener('click', function() {
             currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
-            // Update button text
+            // Update button emoji only
             if (currentSortOrder === 'asc') {
-                this.textContent = '⬇️ ' + tr('sortAscending').replace('⬇️ ', '');
+                this.textContent = '🔼';
+                this.title = tr('sortAscending');
             } else {
-                this.textContent = '⬆️ ' + tr('sortDescending').replace('⬆️ ', '');
+                this.textContent = '🔽';
+                this.title = tr('sortDescending');
             }
             // ÄNDERUNG 3: Sortierreihenfolge speichern
             saveSortAndFilterSettings();
@@ -1996,6 +2001,11 @@ async function loadStats() {
                 categoryStatsDiv.appendChild(grid);
             }
         }
+
+        // Update popup stats if function exists
+        if (typeof window.updatePopupStats === 'function') {
+            window.updatePopupStats();
+        }
     } catch (error) {
         console.error('Error loading stats:', error);
     }
@@ -2146,7 +2156,20 @@ function setupImportView() {
 async function startScan() {
     console.log(`Starting scan with mode ${currentScanMode}...`);
 
+    // NEW: Get selected resolution
+    const resolutionSelect = document.getElementById('resolution-select');
+    const selectedResolution = resolutionSelect.value;
+    console.log(`Selected resolution: ${selectedResolution}`);
+
     try {
+        // NEW: Set resolution in backend
+        const resolutionResult = await api.set_scan_resolution(selectedResolution);
+        if (!resolutionResult.success) {
+            alert('Fehler beim Setzen der Auflösung: ' + resolutionResult.error);
+            return;
+        }
+        console.log('✅ Scan resolution set to:', selectedResolution);
+
         // Set scan mode in backend
         const modeResult = await api.set_scan_mode(currentScanMode);
 
@@ -2292,7 +2315,7 @@ function displayImportResults() {
 
             itemDiv.innerHTML = `
                 <button class="import-item-remove" title="Item entfernen">❌</button>
-                <img src="${item.image_url || '/img/placeholder.png'}" alt="${item.name}" onerror="this.src='/img/placeholder.png'">
+                <img src="${item.image_url || '/img/placeholder.png'}" alt="${item.name}" loading="lazy" onerror="this.src='/img/placeholder.png'">
                 <div class="import-item-name">${item.name}</div>
                 <div class="import-item-count">Anzahl: ${item.count}</div>
                 ${item.scanned_name !== item.name ? `<div style="font-size: 0.75em; color: #888;">OCR: ${item.scanned_name}</div>` : ''}
@@ -2466,46 +2489,8 @@ function openNotDetectedFile() {
     // This would require a new backend method to open files
 }
 
-// Save window size and position when changed (for desktop mode)
-let saveWindowTimeout = null;
-function saveWindowGeometry() {
-    if (saveWindowTimeout) {
-        clearTimeout(saveWindowTimeout);
-    }
-
-    // Debounce saving to avoid too many writes during resize
-    saveWindowTimeout = setTimeout(() => {
-        try {
-            // Check if window is maximized
-            // We detect this by comparing available screen size with window size
-            const isMaximized = (
-                window.outerWidth >= (screen.availWidth - 10) &&
-                window.outerHeight >= (screen.availHeight - 10)
-            );
-
-            if (isMaximized) {
-                localStorage.setItem('windowMaximized', 'true');
-                console.log(`💾 Window state saved: MAXIMIZED`);
-            } else {
-                localStorage.setItem('windowMaximized', 'false');
-                localStorage.setItem('windowWidth', window.outerWidth);
-                localStorage.setItem('windowHeight', window.outerHeight);
-                localStorage.setItem('windowX', window.screenX);
-                localStorage.setItem('windowY', window.screenY);
-                console.log(`💾 Window geometry saved: ${window.outerWidth}x${window.outerHeight} at (${window.screenX}, ${window.screenY})`);
-            }
-        } catch (e) {
-            console.warn('Could not save window geometry:', e);
-        }
-    }, 500); // Save 500ms after last resize/move
-}
-
-// Listen for window resize and move events
-window.addEventListener('resize', saveWindowGeometry);
-window.addEventListener('beforeunload', saveWindowGeometry); // Save on close
-
-// Note: There's no reliable cross-browser event for window move
-// So we'll save position on close only
+// Window geometry is now handled by Python backend via pywebview events
+// No JavaScript-based geometry saving needed anymore
 
 // Footer Button Handlers
 document.addEventListener('DOMContentLoaded', function() {
@@ -2517,23 +2502,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     // Clear localStorage
                     const language = localStorage.getItem('language'); // Save language
-                    const windowSettings = {
-                        width: localStorage.getItem('windowWidth'),
-                        height: localStorage.getItem('windowHeight'),
-                        x: localStorage.getItem('windowX'),
-                        y: localStorage.getItem('windowY'),
-                        maximized: localStorage.getItem('windowMaximized')
-                    };
 
                     localStorage.clear();
 
                     // Restore critical settings
                     if (language) localStorage.setItem('language', language);
-                    if (windowSettings.width) localStorage.setItem('windowWidth', windowSettings.width);
-                    if (windowSettings.height) localStorage.setItem('windowHeight', windowSettings.height);
-                    if (windowSettings.x) localStorage.setItem('windowX', windowSettings.x);
-                    if (windowSettings.y) localStorage.setItem('windowY', windowSettings.y);
-                    if (windowSettings.maximized) localStorage.setItem('windowMaximized', windowSettings.maximized);
+                    // Window geometry is now saved in user_config.json, no need to preserve in localStorage
 
                     // Clear service worker caches if available
                     if ('caches' in window) {

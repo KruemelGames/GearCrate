@@ -13,6 +13,7 @@ lxml>=5.0.0
 # Image Processing
 Pillow>=10.4.0
 
+
 # ====================================
 # InvDetect Scanner Requirements
 # ====================================

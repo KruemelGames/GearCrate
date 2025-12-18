@@ -31,19 +31,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Update dynamic content that's not in HTML
 function updateDynamicContent() {
-    // Update sort order button text
+    // Update sort order button (nur Emoji, kein Text)
     const sortOrderBtn = document.getElementById('sort-order-btn');
     if (sortOrderBtn) {
         if (currentSortOrder === 'asc') {
-            const ascText = window.tr ? window.tr('sortAscending') : 'Ascending';
-            if (typeof ascText === 'string') {
-                sortOrderBtn.textContent = '⬇️ ' + ascText.replace('⬇️ ', '');
-            }
+            sortOrderBtn.textContent = '🔼';
+            sortOrderBtn.title = window.tr ? window.tr('sortAscending') : 'Sort Ascending';
         } else {
-            const descText = window.tr ? window.tr('sortDescending') : 'Descending';
-            if (typeof descText === 'string') {
-                sortOrderBtn.textContent = '⬆️ ' + descText.replace('⬆️ ', '');
-            }
+            sortOrderBtn.textContent = '🔽';
+            sortOrderBtn.title = window.tr ? window.tr('sortDescending') : 'Sort Descending';
         }
     }
 
@@ -66,8 +62,6 @@ function updateDynamicContent() {
 // Override alert messages to use translations
 window.showNotification = function(messageKey, params) {
     const message = (window.tr && params) ? window.tr(messageKey, params) : (window.tr ? window.tr(messageKey) : messageKey);
-    const message = (window.tr && params) ? window.tr(messageKey, params) : (window.tr ? window.tr(messageKey) : messageKey);
-    const message = (window.i18n && params) ? window.i18n.t(messageKey, params) : (window.i18n ? window.i18n.t(messageKey) : messageKey);
     
     const notification = document.createElement('div');
     notification.textContent = message;
@@ -93,15 +87,11 @@ window.showNotification = function(messageKey, params) {
 // Translated confirm dialogs
 window.confirmTranslated = function(messageKey, params) {
     const message = (window.tr && params) ? window.tr(messageKey, params) : (window.tr ? window.tr(messageKey) : messageKey);
-    const message = (window.tr && params) ? window.tr(messageKey, params) : (window.tr ? window.tr(messageKey) : messageKey);
-    const message = (window.i18n && params) ? window.i18n.t(messageKey, params) : (window.i18n ? window.i18n.t(messageKey) : messageKey);
     return confirm(message);
 };
 
 // Translated alerts
 window.alertTranslated = function(messageKey, params) {
     const message = (window.tr && params) ? window.tr(messageKey, params) : (window.tr ? window.tr(messageKey) : messageKey);
-    const message = (window.tr && params) ? window.tr(messageKey, params) : (window.tr ? window.tr(messageKey) : messageKey);
-    const message = (window.i18n && params) ? window.i18n.t(messageKey, params) : (window.i18n ? window.i18n.t(messageKey) : messageKey);
     return alert(message);
 };

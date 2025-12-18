@@ -47,14 +47,19 @@ const api = {
 
     // Scanner methods
     set_scan_mode: (mode) => apiCall('set_scan_mode', { mode }),
+    set_scan_resolution: (resolution) => apiCall('set_scan_resolution', { resolution }),
     start_scanner: () => apiCall('start_scanner', {}),
-    get_scan_results: () => apiCall('get_scan_results', {}),
     get_scan_results: () => apiCall('get_scan_results', {}),
     import_scanned_items: (items) => apiCall('import_scanned_items', { items }),
 
     // User config methods
     get_user_language: () => apiCall('get_user_language', {}),
     set_user_language: (language) => apiCall('set_user_language', { language }),
+
+    // Window geometry methods
+    get_window_geometry: () => apiCall('get_window_geometry', {}),
+    set_window_geometry: (width, height, x, y, maximized) =>
+        apiCall('set_window_geometry', { width, height, x, y, maximized }),
 
     // DevTools
     open_devtools: () => apiCall('open_devtools', {}),
@@ -76,14 +81,19 @@ const api = {
 
     // Scanner methods (camelCase)
     setScanMode: (mode) => apiCall('set_scan_mode', { mode }),
+    setScanResolution: (resolution) => apiCall('set_scan_resolution', { resolution }),
     startScanner: () => apiCall('start_scanner', {}),
-    getScanResults: () => apiCall('get_scan_results', {}),
     getScanResults: () => apiCall('get_scan_results', {}),
     importScannedItems: (items) => apiCall('import_scanned_items', { items }),
 
     // User config methods (camelCase)
     getUserLanguage: () => apiCall('get_user_language', {}),
     setUserLanguage: (language) => apiCall('set_user_language', { language }),
+
+    // Window geometry methods (camelCase)
+    getWindowGeometry: () => apiCall('get_window_geometry', {}),
+    setWindowGeometry: (width, height, x, y, maximized) =>
+        apiCall('set_window_geometry', { width, height, x, y, maximized }),
 
     // DevTools (camelCase)
     openDevtools: () => apiCall('open_devtools', {})

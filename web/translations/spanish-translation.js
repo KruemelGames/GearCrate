@@ -85,10 +85,13 @@ const es = {
     language: "Idioma:",
     languageName: "Español",
 
+    // Bottom Popups
+    settingsTitle: "Configuración",
+
     // Footer Buttons
-    footerClearCache: "🗑️ Limpiar caché",
-    footerDebug: "🐛 Depurar",
-    footerClearInventory: "📦 Limpiar inventario",
+    footerClearCache: "Limpiar caché",
+    footerDebug: "Depurar",
+    footerClearInventory: "Limpiar inventario",
     confirmClearCache: "¿Limpiar caché del sitio y recargar? Esto eliminará todos los datos almacenados en caché.",
     cacheCleared: "¡Caché limpiado! La página se recargará.",
 
@@ -98,7 +101,8 @@ const es = {
     importAdminWarning1: "El escáner InvDetect requiere derechos de administrador para hooks de teclado y cambio de ventana.",
     importAdminWarning2: "<strong>Por favor use:</strong> <code>start-browser-admin.bat</code> o <code>start-desktop-admin.bat</code>",
     importAdminWarning3: "Sin derechos de administrador, el escáner no funcionará.",
-    importSelectScanMode: "🎯 Seleccionar modo de escaneo:",
+    importSelectScanMode: '🎯 Seleccionar modo de escaneo:',
+    importSelectResolution: '🖥️ Seleccionar resolución:',
     importMode1Title: "Objetos 1x1",
     importMode1Desc: "Normal (Armas, Armaduras, etc.)",
     importMode2Title: "Objetos 1x2",

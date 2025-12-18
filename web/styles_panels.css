@@ -1,0 +1,767 @@
+/* ========== LINKES PANEL (Search) ========== */
+.panel-left-wrapper {
+    position: fixed;
+    left: 0;
+    top: 85px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    transform: translateX(-402px);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.panel-left-wrapper.open {
+    transform: translateX(0);
+}
+
+.panel-left-wrapper.peek {
+    transform: translateX(-392px);
+}
+
+.panel-left {
+    width: 400px;
+    min-height: 100px;
+    background: #2d3748;
+    border-radius: 0 0 12px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    position: relative;
+    border: 2px solid #4a5568;
+    border-left: none;
+}
+
+.panel-left.compact {
+    height: auto;
+}
+
+.panel-left.expanded {
+    height: auto;
+}
+
+/* Tab Left */
+.tab-left {
+    width: 55px;
+    height: 85px;
+    position: relative;
+    cursor: pointer;
+    margin-left: -1px;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.tab-left svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.tab-left .tab-bg {
+    fill: #2d3748;
+    transition: fill 0.2s ease;
+}
+
+.tab-left:hover .tab-bg {
+    fill: #3d4a5c;
+}
+
+.tab-left .tab-border {
+    fill: none;
+    stroke: #4a5568;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tab-left .tab-icon {
+    position: relative;
+    z-index: 2;
+    font-size: 22px;
+    color: #a0aec0;
+}
+
+/* ========== RECHTES PANEL (Filter) ========== */
+.panel-right-wrapper {
+    position: fixed;
+    right: 0;
+    top: 85px;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-start;
+    transform: translateX(162px);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.panel-right-wrapper.open {
+    transform: translateX(0);
+}
+
+.panel-right-wrapper.peek {
+    transform: translateX(152px);
+}
+
+.panel-right {
+    width: 160px;
+    height: auto;
+    background: #2d3748;
+    border-radius: 0 0 0 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    padding: 12px;
+    border: 2px solid #4a5568;
+    border-right: none;
+}
+
+/* Tab Right */
+.tab-right {
+    width: 55px;
+    height: 85px;
+    position: relative;
+    cursor: pointer;
+    margin-right: -1px;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.tab-right svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.tab-right .tab-bg {
+    fill: #2d3748;
+    transition: fill 0.2s ease;
+}
+
+.tab-right:hover .tab-bg {
+    fill: #3d4a5c;
+}
+
+.tab-right .tab-border {
+    fill: none;
+    stroke: #4a5568;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tab-right .tab-icon {
+    position: relative;
+    z-index: 2;
+    font-size: 22px;
+    color: #a0aec0;
+}
+
+/* ========== SUCHBEREICH LINKS ========== */
+.search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.search-results-label {
+    color: #e2e8f0;
+    font-size: 12px;
+    padding: 5px 0;
+}
+
+.search-results-label strong {
+    color: #4299e1;
+    font-size: 14px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #1a202c;
+    color: #e2e8f0;
+    font-size: 14px;
+}
+
+.search-input:focus {
+    outline: 2px solid #4299e1;
+}
+
+.search-limit-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e2e8f0;
+    font-size: 12px;
+}
+
+.search-limit-select {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    background: #1a202c;
+    color: #e2e8f0;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.search-limit-select:focus {
+    outline: 2px solid #4299e1;
+}
+
+.search-list {
+    overflow-y: auto;
+    background: #1a202c;
+    border-radius: 6px;
+    padding: 5px;
+    display: none;
+    max-height: 534px; /* Exakt 12 Items */
+}
+
+.search-list.visible {
+    display: block;
+}
+
+/* Search Result Items */
+.search-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    background: #2d3748;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    transition: background 0.2s;
+    cursor: pointer;
+    gap: 8px;
+}
+
+.search-item:last-child {
+    margin-bottom: 0;
+}
+
+.search-item:hover {
+    background: #3d4a5c;
+}
+
+.search-item img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.search-item .item-name {
+    flex: 1;
+    color: #e2e8f0;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.no-results {
+    color: #718096;
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+}
+
+/* Search Result Items (mit +/- Buttons) */
+.search-result-item {
+    padding: 8px;
+    border-bottom: 1px solid #333;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.search-result-item:hover {
+    background: #3d4a5c;
+}
+
+.search-item-name {
+    color: #e2e8f0;
+    font-weight: 500;
+    flex: 1;
+    cursor: pointer;
+}
+
+.search-item-count {
+    margin-right: 10px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: right;
+}
+
+.search-item-thumbnail {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.search-quick-btn {
+    padding: 5px 12px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.search-btn-plus {
+    background: #4299e1;
+    color: white;
+}
+
+.search-btn-plus:hover {
+    background: #3182ce;
+    transform: scale(1.1);
+}
+
+.search-btn-minus {
+    background: #4a5568;
+    color: white;
+}
+
+.search-btn-minus:hover {
+    background: #e53e3e;
+    transform: scale(1.1);
+}
+
+.search-btn-minus:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Item Preview (bleibt im linken Panel) */
+.item-preview {
+    background: #1a202c;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.item-preview.hidden {
+    display: none;
+}
+
+.item-preview h3 {
+    color: #e2e8f0;
+    margin-bottom: 5px;
+}
+
+.item-preview p {
+    color: #a0aec0;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.item-preview img {
+    width: 100%;
+    max-width: 200px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.item-preview button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #4299e1;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.item-preview button:hover {
+    background: #3182ce;
+}
+
+/* ========== FILTER BEREICH RECHTS ========== */
+.filter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    background: #1a202c;
+    color: #e2e8f0;
+    font-size: 13px;
+}
+
+.filter-input:focus {
+    outline: 2px solid #4299e1;
+}
+
+/* Sort Buttons 2x2 Grid */
+.sort-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.sort-btn,
+.order-btn {
+    width: 100%;
+    padding: 10px 4px;
+    border: none;
+    border-radius: 4px;
+    background: #4a5568;
+    color: #e2e8f0;
+    cursor: pointer;
+    font-size: 14px; /* Größerer Text */
+    font-weight: 600; /* Fetterer Text */
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 42px; /* Gleiche Mindesthöhe */
+}
+
+.sort-btn:hover,
+.order-btn:hover {
+    background: #5a6a7a;
+    transform: scale(1.05);
+}
+
+.sort-btn.active {
+    background: #4299e1;
+}
+
+/* Order Button: nur Emoji, gleiche Größe */
+.order-btn {
+    font-size: 20px; /* Größeres Emoji */
+    font-weight: normal; /* Emoji braucht kein bold */
+}
+
+/* Separator */
+.filter-separator {
+    height: 1px;
+    background: #4a5568;
+    margin: 4px 0;
+}
+
+/* Kategorie Buttons Grid (2 Spalten) */
+.category-grid-panel {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.category-btn-panel {
+    width: 100%;
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 6px;
+    background: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Kategorie Button mit Placeholder-Image */
+.category-btn-panel.has-image {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* Alpha-Fade-Effekt wird über mask-image gemacht */
+    -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0.7) 75%, rgba(0,0,0,0) 100%);
+    mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0.7) 75%, rgba(0,0,0,0) 100%);
+}
+
+.category-btn-panel:hover {
+    background-color: #5a6a7a;
+    transform: scale(1.05);
+}
+
+.category-btn-panel.active {
+    background-color: #4299e1;
+    box-shadow: 0 0 10px rgba(66, 153, 225, 0.5);
+}
+
+/* ========== SCROLLBAR ========== */
+.search-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-list::-webkit-scrollbar-track {
+    background: #1a202c;
+    border-radius: 3px;
+}
+
+.search-list::-webkit-scrollbar-thumb {
+    background: #4a5568;
+    border-radius: 3px;
+}
+
+.search-list::-webkit-scrollbar-thumb:hover {
+    background: #5a6a7a;
+}
+
+/* ========================================
+   BOTTOM PANELS - Left (Stats) & Right (Settings)
+   ======================================== */
+
+/* ========== LINKES UNTERES PANEL (Statistik) ========== */
+.panel-bottom-left-wrapper {
+    position: fixed;
+    left: 0;
+    bottom: 25px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    transform: translateX(-402px);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.panel-bottom-left-wrapper.open {
+    transform: translateX(0);
+}
+
+.panel-bottom-left-wrapper.peek {
+    transform: translateX(-392px);
+}
+
+.panel-bottom-left {
+    width: 400px;
+    min-height: 100px;
+    background: #2d3748;
+    border-radius: 0 12px 0 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    position: relative;
+    border: 2px solid #4a5568;
+    border-left: none;
+}
+
+.panel-bottom-left h3 {
+    color: #e2e8f0;
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.popup-stats-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.popup-stats-content .stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #4a5568;
+}
+
+.popup-stats-content .stat-item:last-child {
+    border-bottom: none;
+}
+
+.popup-stats-content .stat-label {
+    color: #a0aec0;
+    font-size: 12px;
+}
+
+.popup-stats-content .stat-value {
+    color: #4299e1;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+/* Tab Bottom Left - identisch zu Tab Left */
+.tab-bottom-left {
+    width: 55px;
+    height: 85px;
+    position: relative;
+    cursor: pointer;
+    margin-left: -1px;
+    margin-bottom: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.tab-bottom-left svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.tab-bottom-left .tab-bg {
+    fill: #2d3748;
+    transition: fill 0.2s ease;
+}
+
+.tab-bottom-left:hover .tab-bg {
+    fill: #3d4a5c;
+}
+
+.tab-bottom-left .tab-border {
+    fill: none;
+    stroke: #4a5568;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tab-bottom-left .tab-icon {
+    position: relative;
+    z-index: 2;
+    font-size: 22px;
+    color: #a0aec0;
+}
+
+/* ========== RECHTES UNTERES PANEL (Einstellungen) ========== */
+.panel-bottom-right-wrapper {
+    position: fixed;
+    right: 0;
+    bottom: 25px;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-end;
+    transform: translateX(162px);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.panel-bottom-right-wrapper.open {
+    transform: translateX(0);
+}
+
+.panel-bottom-right-wrapper.peek {
+    transform: translateX(152px);
+}
+
+.panel-bottom-right {
+    width: 160px;
+    height: auto;
+    background: #2d3748;
+    border-radius: 12px 0 0 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    padding: 12px;
+    border: 2px solid #4a5568;
+    border-right: none;
+}
+
+.panel-bottom-right h3 {
+    color: #e2e8f0;
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.popup-settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.settings-btn {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #4a5568;
+    color: #e2e8f0;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-btn:hover {
+    background: #5a6a7a;
+    transform: translateX(-2px);
+}
+
+.settings-btn:active {
+    transform: scale(0.98);
+}
+
+/* Tab Bottom Right - identisch zu Tab Right */
+.tab-bottom-right {
+    width: 55px;
+    height: 85px;
+    position: relative;
+    cursor: pointer;
+    margin-right: -1px;
+    margin-bottom: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.tab-bottom-right svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.tab-bottom-right .tab-bg {
+    fill: #2d3748;
+    transition: fill 0.2s ease;
+}
+
+.tab-bottom-right:hover .tab-bg {
+    fill: #3d4a5c;
+}
+
+.tab-bottom-right .tab-border {
+    fill: none;
+    stroke: #4a5568;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tab-bottom-right .tab-icon {
+    position: relative;
+    z-index: 2;
+    font-size: 22px;
+    color: #a0aec0;
+}

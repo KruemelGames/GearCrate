@@ -85,10 +85,13 @@ const de = {
     language: "Sprache:",
     languageName: "Deutsch",
 
+    // Bottom Popups
+    settingsTitle: "Einstellungen",
+
     // Footer Buttons
-    footerClearCache: "🗑️ Cache leeren",
-    footerDebug: "🐛 Debug",
-    footerClearInventory: "📦 Inventar leeren",
+    footerClearCache: "Cache leeren",
+    footerDebug: "Debug",
+    footerClearInventory: "Inventar leeren",
     confirmClearCache: "Website-Cache leeren und neu laden? Dies entfernt alle zwischengespeicherten Daten.",
     cacheCleared: "Cache geleert! Seite wird neu geladen.",
 
@@ -99,6 +102,7 @@ const de = {
     importAdminWarning2: "<strong>Bitte verwende:</strong> <code>start-browser-admin.bat</code> oder <code>start-desktop-admin.bat</code>",
     importAdminWarning3: "Ohne Admin-Rechte wird der Scanner nicht funktionieren.",
     importSelectScanMode: "🎯 Scan Mode wählen:",
+    importSelectResolution: '🖥️ Auflösung wählen:',
     importMode1Title: "1x1 Items",
     importMode1Desc: "Normal (Waffen, Rüstungen, etc.)",
     importMode2Title: "1x2 Items",
