@@ -14,7 +14,7 @@ A desktop tool designed for managing and tracking your collected armor, clothing
 
 ## Download
 
-Download the latest test version here: https://github.com/KruemelGames/GearCrate/releases/tag/Test
+Download the latest test version here: [https://github.com/KruemelGames/GearCrate/releases/tag/Test](https://github.com/KruemelGames/GearCrate/releases)](https://github.com/KruemelGames/GearCrate/releases)
 
 ## Installation & Launch (Optimized Workflow)
 
